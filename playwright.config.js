@@ -4,8 +4,15 @@ export default defineConfig({
     projects: [
         {
             name: 'windows',
-            testMatch: 'integration-test/playwright/*.spec.js',
+            testMatch: ['integration-test/playwright/duckplayer.spec.js'],
             use: { platform: 'windows' }
+        },
+        {
+            name: 'android',
+            testMatch: ['integration-test/playwright/click-to-load.spec.js'],
+            use: {
+                platform: 'android'
+            }
         }
     ],
     timeout: 30 * 1000,

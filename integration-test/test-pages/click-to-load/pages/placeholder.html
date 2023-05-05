@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Click to load</title>
+    <link rel="stylesheet" href="../../shared/style.css">
+    <style>
+
+    </style>
+</head>
+<body>
+<script src="../../shared/utils.js"></script>
+<p><a href="../index.html">Click to load</a></p>
+
+<main></main>
+<template id="inner">
+    <p>Click to load</p>
+</template>
+<script type="module">
+    document.querySelector('main').innerHTML = document.querySelector('template[id="inner"]').innerHTML;
+</script>
+</body>
+</html>
