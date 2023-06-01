@@ -1,27 +1,18 @@
-import { sendMessage } from '../../../src/utils'
-
-export class SendMessageMessagingConfig {}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { MessagingTransport } from '@duckduckgo/messaging'
+import { sendMessage } from '../../utils.js'
 
 /**
- * An temporary implementation of {@link MessagingTransport} to communicate with Android and Extension.
- * It wraps the current messaging system that calls `sendMessage`
- *
- * @implements {MessagingTransport}
+ * @implements MessagingTransport
  */
-export class SendMessageMessagingTransport {
+export class ClickToLoadMessagingTransport {
     /**
      * Queue of callbacks to be called with messages sent from the Platform.
      * This is used to connect requests with responses and to trigger subscriptions callbacks.
      */
     _queue = new Set()
 
-    /**
-     * @param {SendMessageMessagingConfig} config
-     * @param {import("@duckduckgo/messaging").MessagingContext} messagingContext
-     * @internal
-     */
-    constructor (config, messagingContext) {
-        this.messagingContext = messagingContext
+    constructor () {
         this.globals = {
             window,
             JSONparse: window.JSON.parse,
@@ -49,43 +40,33 @@ export class SendMessageMessagingTransport {
     }
 
     /**
-     * @param {import("@duckduckgo/messaging").RequestMessage} msg
+     * @param {import("@duckduckgo/messaging").RequestMessage} req
      * @return {Promise<any>}
      */
     request (req) {
-        switch (req.method) {
-        case 'getYouTubeVideoDetails': {
-            const comparator = (eventData) => {
+        let comparator = (eventData) => {
+            return eventData.responseMessageType === req.method
+        }
+
+        if (req.method === 'getYouTubeVideoDetails') {
+            comparator = (eventData) => {
                 return (
                     eventData.responseMessageType === req.method &&
-                        eventData.response &&
-                        eventData.response.videoURL === req.params
+                    eventData.response &&
+                    eventData.response.videoURL === req.params?.videoURL
                 )
             }
-            return new this.globals.Promise((resolve) => {
-                sendMessage('getYouTubeVideoDetails', req.params)
-                this._subscribe(comparator, (msgRes, unsubscribe) => {
-                    unsubscribe()
+        }
 
-                    resolve(msgRes.response)
-                })
-            })
-        }
-        // Expected default messages:
-        default: {
-            const comparator = (eventData) => {
-                return eventData.responseMessageType === req.method
-            }
-            sendMessage(req.method, req.params)
-            return new this.globals.Promise((resolve) => {
-                this._subscribe(comparator, (msgRes, unsubscribe) => {
-                    unsubscribe()
+        sendMessage(req.method, req.params)
 
-                    resolve(msgRes.response)
-                })
+        return new this.globals.Promise((resolve) => {
+            this._subscribe(comparator, (msgRes, unsubscribe) => {
+                unsubscribe()
+
+                resolve(msgRes.response)
             })
-        }
-        }
+        })
     }
 
     /**

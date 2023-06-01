@@ -1,6 +1,7 @@
 import { camelcase, matchHostname, processAttr, computeEnabledFeatures, parseFeatureSettings } from './utils.js'
 import { immutableJSONPatch } from 'immutable-json-patch'
 import { PerformanceMonitor } from './performance.js'
+import { MessagingContext } from '@duckduckgo/messaging'
 
 /**
  * @typedef {object} AssetConfig
@@ -29,6 +30,9 @@ export default class ContentFeature {
     /** @type {{ debug?: boolean, featureSettings?: Record<string, unknown>, assets?: AssetConfig | undefined, site: Site  } | null} */
     #args
 
+    /** @type {MessagingContext} */
+    #messagingContext
+
     constructor (featureName) {
         this.name = featureName
         this.#args = null
@@ -37,6 +41,16 @@ export default class ContentFeature {
 
     get isDebug () {
         return this.#args?.debug || false
+    }
+
+    get messagingContext () {
+        if (this.#messagingContext) return this.#messagingContext
+        this.#messagingContext = new MessagingContext({
+            context: 'contentScopeScripts',
+            featureName: this.name,
+            env: this.isDebug ? 'development' : 'production'
+        })
+        return this.#messagingContext
     }
 
     /**
