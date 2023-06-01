@@ -5,6 +5,7 @@ import ContentFeature from '../content-feature.js'
 import { DDGCtlPlaceholderBlockedElement } from './click-to-load/components/ctl-placeholder-blocked.js'
 import { Messaging, TestTransportConfig, WebkitMessagingConfig } from '@duckduckgo/messaging'
 import { ClickToLoadMessagingTransport } from './click-to-load/ctl-messaging-transport.js'
+import { registerCustomElements } from './click-to-load/components/components.js'
 
 /**
  * @typedef {'darkMode' | 'lightMode' | 'loginMode' | 'cancelMode'} displayMode
@@ -1719,6 +1720,8 @@ export default class ClickToLoad extends ContentFeature {
         }
 
         _messagingModuleScope = this.messaging
+
+        registerCustomElements()
 
         const websiteOwner = args?.site?.parentEntity
         const settings = args?.featureSettings?.clickToLoad || {}
