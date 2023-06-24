@@ -3,5 +3,6 @@ node_modules/
 .swiftpm
 .env
 build/
+build_bak/
 docs/
 Sources/ContentScopeScripts/dist/

@@ -1,4 +1,4 @@
-import { rollupScript } from './utils/build.js'
+import { bundle } from './utils/build.js'
 import { parseArgs, write } from './script-utils.js'
 import { camelcase } from '../src/utils.js'
 
@@ -56,7 +56,7 @@ const builds = {
 async function initOther (injectScriptPath, platformName) {
     const supportsMozProxies = platformName === 'firefox'
     const identName = `inject${camelcase(platformName)}`
-    const injectScript = await rollupScript({
+    const injectScript = await bundle({
         scriptPath: injectScriptPath,
         name: identName,
         supportsMozProxies,
@@ -72,8 +72,8 @@ async function initOther (injectScriptPath, platformName) {
  */
 async function initChrome (entry, platformName) {
     const replaceString = '/* global contentScopeFeatures */'
-    const injectScript = await rollupScript({ scriptPath: entry, platform: platformName })
-    const contentScope = await rollupScript({
+    const injectScript = await bundle({ scriptPath: entry, platform: platformName })
+    const contentScope = await bundle({
         scriptPath: contentScopePath,
         name: contentScopeName,
         platform: platformName
