@@ -34,8 +34,8 @@
     "serve": "http-server -c-1 --port 3220 integration-test/test-pages",
     "playwright": "playwright test",
     "playwright-headed": "playwright test --headed",
-    "preplaywright": "npm run build-windows && npm run bundle",
-    "preplaywright-headed": "npm run build-windows && npm run bundle"
+    "preplaywright": "npm run bundle",
+    "preplaywright-headed": "npm run bundle"
   },
   "type": "module",
   "workspaces": [
