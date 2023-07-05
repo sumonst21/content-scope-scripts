@@ -34,7 +34,7 @@ export const support = {
     },
     'debug-tools': {
         'windows': ['copy', 'build-js'],
-        'apple': ['copy', 'build-js', 'inline-html'],
+        'apple': ['copy', 'build-js'],
     },
 }
 
