@@ -1,10 +1,6 @@
 import { Mocks } from './mocks.js'
-import { expect } from '@playwright/test'
-import { join } from 'node:path'
 import { perPlatform } from '../../../../integration-test/playwright/type-helpers.mjs'
 import { getFeaturesResponseSchema } from '../../pages/debug-tools/schema/__generated__/schema.parsers.mjs'
-
-const MOCK_VIDEO_ID = 'VIDEO_ID'
 
 /**
  * @typedef {import('../../../../integration-test/playwright/type-helpers.mjs').Build} Build
