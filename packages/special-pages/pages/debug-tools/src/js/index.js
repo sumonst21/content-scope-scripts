@@ -7,7 +7,7 @@
  * A JavaScript application that provides common debugging utilities for DuckDuckGo Browsers
  */
 
-import { DebugToolsMessages } from './DebugToolsMessages'
+import { DebugToolsMessages } from './DebugToolsMessages.mjs'
 import { createSpecialPagesMessaging } from '../../../../shared/create-messaging'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { render, h, Fragment } from 'preact'
