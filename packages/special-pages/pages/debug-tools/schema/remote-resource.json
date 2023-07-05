@@ -21,10 +21,10 @@
         "source": {
           "oneOf": [
             {
-              "$ref": "#/definitions/sourceUrl"
+              "$ref": "#/definitions/remoteSource"
             },
             {
-              "$ref": "#/definitions/sourceDebugTools"
+              "$ref": "#/definitions/debugToolsSource"
             }
           ]
         },
@@ -43,26 +43,30 @@
   },
   "required": ["id", "url", "current", "name"],
   "definitions": {
-    "sourceUrl": {
+    "remoteSource": {
       "type": "object",
-      "title": "UrlSource",
+      "title": "RemoteSource",
       "properties": {
-        "url": {
+        "remote": {
           "type": "object",
           "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
             "fetchedAt": {
               "type": "string",
               "format": "date-time"
             }
           },
-          "required": ["fetchedAt"],
+          "required": ["fetchedAt", "url"],
           "additionalProperties": false
         }
       },
-      "required": ["url"],
+      "required": ["remote"],
       "additionalProperties": false
     },
-    "sourceDebugTools": {
+    "debugToolsSource": {
       "type": "object",
       "title": "DebugToolsSource",
       "properties": {

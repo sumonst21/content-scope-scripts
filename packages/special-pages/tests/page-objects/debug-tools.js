@@ -57,8 +57,8 @@ export class DebugToolsPage {
      */
     async installRemoteMocks () {
         // default: https://staticcdn.duckduckgo.com/trackerblocking/config/v2/macos-config.json
-        await this.page.route('https://staticcdn.duckduckgo.com/trackerblocking/**', (route, req) => {
-            const url = new URL(req.url())
+        await this.page.route('https://staticcdn.duckduckgo.com/trackerblocking/**', (route /* req */) => {
+            // const url = new URL(req.url())
             return route.fulfill({
                 status: 200,
                 json: {

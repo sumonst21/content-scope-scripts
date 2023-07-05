@@ -39,7 +39,7 @@ export interface RemoteResource {
    */
   name: string;
   current: {
-    source: UrlSource | DebugToolsSource;
+    source: RemoteSource | DebugToolsSource;
     /**
      * The contents of the resource - always as a string value.
      */
@@ -50,8 +50,9 @@ export interface RemoteResource {
     contentType: string;
   };
 }
-export interface UrlSource {
-  url: {
+export interface RemoteSource {
+  remote: {
+    url: string;
     fetchedAt: string;
   };
 }
