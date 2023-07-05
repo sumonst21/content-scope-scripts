@@ -76,7 +76,7 @@ describe('__fixtures__', () => {
                         "fetchedAt": "2023-07-05T12:34:56Z"
                     }
                 },
-                "contents": "{}",
+                "contents": "{...}",
                 "contentType": "application/json"
             }
         })

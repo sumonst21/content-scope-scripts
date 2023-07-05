@@ -2,9 +2,10 @@ import { writeFileSync, readFileSync } from 'node:fs'
 import { join } from 'path'
 import { generate } from 'ts-to-zod'
 import { compile } from 'json-schema-to-typescript'
+import { cwd } from '../../scripts/script-utils.js'
 
 // @ts-ignore
-const CWD = new URL(".", import.meta.url).pathname
+const CWD = cwd(import.meta.url);
 const BASE = join(CWD, 'pages', 'debug-tools', 'schema')
 const SCHEMA_TYPES = join(BASE, '__generated__', 'schema.types.ts')
 const SCHEMA_PARSERS = join(BASE, '__generated__', 'schema.parsers.mjs')

@@ -2,7 +2,7 @@
   "id": "privacy-configuration",
   "source": {
     "debugTools": {
-      "content": "{}"
+      "content": "{...}"
     }
   }
 }
