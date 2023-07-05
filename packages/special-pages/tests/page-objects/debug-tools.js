@@ -2,12 +2,14 @@ import { Mocks } from './mocks.js'
 import { expect } from '@playwright/test'
 import { join } from 'node:path'
 import { perPlatform } from '../../../../integration-test/playwright/type-helpers.mjs'
+import { getFeaturesResponseSchema } from '../../pages/debug-tools/schema/__generated__/schema.parsers.mjs'
 
 const MOCK_VIDEO_ID = 'VIDEO_ID'
 
 /**
  * @typedef {import('../../../../integration-test/playwright/type-helpers.mjs').Build} Build
  * @typedef {import('../../../../integration-test/playwright/type-helpers.mjs').PlatformInfo} PlatformInfo
+ * @typedef {import('../../pages/debug-tools/schema/__generated__/schema.types')} GetFeaturesResponse
  */
 
 export class DebugToolsPage {
@@ -22,12 +24,22 @@ export class DebugToolsPage {
         this.platform = platform
         this.mocks = new Mocks(page, build, platform, {
             context: 'specialPages',
-            featureName: 'debugTools',
+            featureName: 'debugToolsPage',
             env: 'development'
         })
         // default mocks - just enough to render the first page without error
         this.mocks.defaultResponses({
-            // nothing yet
+            getFeatures: {
+                /** @type {GetFeaturesResponse} */
+                features: {
+                    remoteResources: {
+                        resources: []
+                    }
+                }
+            }
+        })
+        page.on('console', (msg) => {
+            console.log(msg.type(), msg.text())
         })
     }
 
@@ -74,6 +86,11 @@ export class DebugToolsPage {
     async hasLoaded () {
         // this makes sure the JS is compiled/loaded
         await this.page.locator('main[data-loaded=true]').waitFor()
+        const html = await this.page.locator('code').innerHTML()
+
+        // these will throw if it's invalid / absent, which is fine for now
+        const asJson = JSON.parse(html)
+        getFeaturesResponseSchema.parse(asJson)
     }
 
     /**

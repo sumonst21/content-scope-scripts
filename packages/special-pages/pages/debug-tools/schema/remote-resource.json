@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "RemoteResource",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "name": {
+      "type": "string",
+      "description": "How this resources is referred to in the UI."
+    },
+    "current": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/sourceUrl"
+            },
+            {
+              "$ref": "#/definitions/sourceDebugTools"
+            }
+          ]
+        },
+        "contents": {
+          "type": "string",
+          "description": "The contents of the resource - always as a string value."
+        },
+        "contentType": {
+          "type": "string",
+          "examples": ["application/json", "text/plain", "application/javascript"],
+          "description": "A mime type for the contents of the resource."
+        }
+      },
+      "required": ["source", "contents", "contentType"]
+    }
+  },
+  "required": ["id", "url", "current", "name"],
+  "definitions": {
+    "sourceUrl": {
+      "type": "object",
+      "title": "UrlSource",
+      "properties": {
+        "url": {
+          "type": "object",
+          "properties": {
+            "fetchedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": ["fetchedAt"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["url"],
+      "additionalProperties": false
+    },
+    "sourceDebugTools": {
+      "type": "object",
+      "title": "DebugToolsSource",
+      "properties": {
+        "debugTools": {
+          "type": "object",
+          "properties": {
+            "modifiedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": ["modifiedAt"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["debugTools"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

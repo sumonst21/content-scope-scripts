@@ -24,6 +24,9 @@
     "http-server": "^14.1.1",
     "@duckduckgo/messaging": "*",
     "esbuild": "^0.17.19",
-    "web-resource-inliner": "^6.0.1"
+    "web-resource-inliner": "^6.0.1",
+    "ts-to-zod": "^3.1.3",
+    "zod": "^3.6.0",
+    "json-schema-to-typescript": "^13.0.2"
   }
 }
