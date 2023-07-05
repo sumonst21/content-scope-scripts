@@ -9,6 +9,8 @@
 
 import { DebugToolsMessages } from './DebugToolsMessages'
 import { createSpecialPagesMessaging } from '../../../../shared/create-messaging'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { render, h, Fragment } from 'preact'
 
 export { DebugToolsMessages }
 
@@ -16,8 +18,6 @@ export { DebugToolsMessages }
  * Initializes all parts of the page on load.
  */
 document.addEventListener('DOMContentLoaded', async () => {
-    const main = document.querySelector('main')
-    if (main) main.dataset.loaded = String(true)
     const messagingInstance = createSpecialPagesMessaging({
         injectName: import.meta.injectName,
         env: import.meta.env,
@@ -26,8 +26,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const messages = new DebugToolsMessages(messagingInstance)
     const features = await messages.getFeatures()
-    const debug = document.querySelector('#debug')
-    if (debug) {
-        debug.textContent = JSON.stringify(features, null, 2)
+    const root = document.querySelector('#app')
+    if (!root) return
+
+    function App () {
+        return <main data-loaded="true">
+            <h1>Hello from Debug Tools</h1>
+            <pre><code id="debug">{JSON.stringify(features, null, 2)}</code></pre>
+        </main>
     }
+    render(<App />, root)
 })

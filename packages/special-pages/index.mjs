@@ -33,6 +33,7 @@ export const support = {
         'apple': ['copy', 'build-js', 'inline-html'],
     },
     'debug-tools': {
+        'integration': ['copy', 'build-js'],
         'windows': ['copy', 'build-js'],
         'apple': ['copy', 'build-js'],
     },
@@ -121,6 +122,11 @@ for (const buildJob of buildJobs) {
             outfile: buildJob.dest,
             bundle: true,
             format: 'iife',
+            jsxFactory: 'h',
+            jsxFragment: 'Fragment',
+            loader: {
+                '.js': 'jsx'
+            },
             define: {
                 'import.meta.env': JSON.stringify(NODE_ENV),
                 'import.meta.injectName': JSON.stringify(buildJob.injectName),

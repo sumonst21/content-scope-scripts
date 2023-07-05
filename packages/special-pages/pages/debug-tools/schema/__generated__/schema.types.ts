@@ -23,6 +23,7 @@
  */
 export interface API {
   getFeatures?: GetFeaturesResponse;
+  updateResource?: UpdateResourceParams;
 }
 export interface GetFeaturesResponse {
   features: {
@@ -59,6 +60,23 @@ export interface RemoteSource {
 export interface DebugToolsSource {
   debugTools: {
     modifiedAt: string;
+  };
+}
+export interface UpdateResourceParams {
+  id: string;
+  source: UpdatingRemoteSource | UpdatingDebugToolsSource;
+}
+/**
+ * This is not the same as the source in the remote-resource schema. This is a subset of that schema that omits the 'fetchedAt' key.
+ */
+export interface UpdatingRemoteSource {
+  remote: {
+    url: string;
+  };
+}
+export interface UpdatingDebugToolsSource {
+  debugTools: {
+    content: string;
   };
 }
 

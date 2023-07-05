@@ -5,6 +5,7 @@
     "type": "object",
     "additionalProperties": false,
     "properties": {
-        "getFeatures": { "$ref": "./getFeatures.json" }
+        "getFeatures": { "$ref": "./getFeatures.json" },
+        "updateResource": { "$ref": "./updateResource.json" }
     }
 }

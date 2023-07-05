@@ -14,6 +14,23 @@ export const debugToolsSourceSchema = z.object({
     })
 });
 
+export const updatingRemoteSourceSchema = z.object({
+    remote: z.object({
+        url: z.string()
+    })
+});
+
+export const updatingDebugToolsSourceSchema = z.object({
+    debugTools: z.object({
+        content: z.string()
+    })
+});
+
+export const updateResourceParamsSchema = z.object({
+    id: z.string(),
+    source: z.union([updatingRemoteSourceSchema, updatingDebugToolsSourceSchema])
+});
+
 export const remoteResourceSchema = z.object({
     id: z.string(),
     url: z.string(),
@@ -34,6 +51,7 @@ export const getFeaturesResponseSchema = z.object({
 });
 
 export const apiSchema = z.object({
-    getFeatures: getFeaturesResponseSchema.optional()
+    getFeatures: getFeaturesResponseSchema.optional(),
+    updateResource: updateResourceParamsSchema.optional()
 });
 
