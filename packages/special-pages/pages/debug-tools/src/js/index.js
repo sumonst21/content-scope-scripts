@@ -6,13 +6,15 @@
  *
  * A JavaScript application that provides common debugging utilities for DuckDuckGo Browsers
  */
-
+import 'preact/debug'
 import { DebugToolsMessages } from './DebugToolsMessages.mjs'
 import { createSpecialPagesMessaging } from '../../../../shared/create-messaging'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { render, h, Fragment } from 'preact'
+import { useState } from 'preact/hooks'
 import { Editor } from './components/editor'
 import { updateResourceParamsSchema } from '../../schema/__generated__/schema.parsers.mjs'
+import { RemoteResourceUrl } from './components/remote-resource-url'
 
 export { DebugToolsMessages }
 
@@ -30,17 +32,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const messages = new DebugToolsMessages(messagingInstance)
     const features = await messages.getFeatures()
     const root = document.querySelector('#app')
-    if (!root) return
+    if (!root) return console.warn('noooop')
 
-    /**
-     * @param {UpdateResourceParams} resp
-     */
-    async function save (resp) {
-        const response = await messages.updateResource(resp)
-        console.log('GOT RESPONSE', response.current)
-    }
-
-    render(<App getFeatures={features} save={save}/>, root)
+    render(<App getFeatures={features} messages={messages} />, root)
 })
 
 /**
@@ -110,7 +104,11 @@ class MockImpl {
                 }
             }
             if ('remote' in parsed.source) {
-                throw new Error('todo! \'remote\' in parsed.source')
+                const remote = await fetch(parsed.source.remote.url).then(x => x.text())
+                next.current.source = {
+                    remote: { url: parsed.source.remote.url, fetchedAt: formattedDate }
+                }
+                next.current.contents = remote
             }
             if ('debugTools' in parsed.source) {
                 next.current.source = {
@@ -140,15 +138,24 @@ class MockImpl {
 
 /**
  * @param {{
+ *    messages: DebugToolsMessages;
  *    getFeatures: GetFeaturesResponse;
- *    save: (res: UpdateResourceParams) => void;
  * }} props
  */
 function App (props) {
-    const first = props.getFeatures.features.remoteResources.resources[0]
+    const [resource, setResource] = useState(props.getFeatures.features.remoteResources.resources[0])
+
+    /**
+     * @param {UpdateResourceParams} resp
+     */
+    async function save (resp) {
+        const response = await props.messages.updateResource(resp)
+        setResource(response)
+    }
 
     return <main data-loaded="true">
         <h1>Hello from Debug Tools</h1>
-        <Editor resource={first} save={props.save}></Editor>
+        <RemoteResourceUrl resource={resource} save={save}></RemoteResourceUrl>
+        <Editor resource={resource} save={save}></Editor>
     </main>
 }

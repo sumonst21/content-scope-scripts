@@ -24,7 +24,8 @@ export class DebugToolsMessages {
      */
     async getFeatures () {
         const response = await this.messaging.request('getFeatures')
-        return getFeaturesResponseSchema.parse(response)
+        const parsed = getFeaturesResponseSchema.parse(response)
+        return parsed;
     }
 
     /**
@@ -34,6 +35,11 @@ export class DebugToolsMessages {
     async updateResource (params) {
         const outgoing = updateResourceParamsSchema.parse(params)
         const response = await this.messaging.request('updateResource', outgoing)
-        return remoteResourceSchema.parse(response)
+        const featuresResponse = getFeaturesResponseSchema.parse(response)
+        const matching = featuresResponse.features.remoteResources.resources.find(x => x.id == params.id);
+        if (!matching) {
+            throw new Error('todo! how can we get here?')
+        }
+        return matching
     }
 }

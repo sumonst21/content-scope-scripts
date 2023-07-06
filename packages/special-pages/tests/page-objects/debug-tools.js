@@ -6,6 +6,7 @@ import { perPlatform } from '../../../../integration-test/playwright/type-helper
  * @typedef {import('../../../../integration-test/playwright/type-helpers.mjs').Build} Build
  * @typedef {import('../../../../integration-test/playwright/type-helpers.mjs').PlatformInfo} PlatformInfo
  * @typedef {import('../../pages/debug-tools/schema/__generated__/schema.types').GetFeaturesResponse} GetFeaturesResponse
+ * @typedef {import('../../pages/debug-tools/schema/__generated__/schema.types').RemoteResource} RemoteResource
  */
 
 export class DebugToolsPage {
@@ -23,34 +24,37 @@ export class DebugToolsPage {
             featureName: 'debugToolsPage',
             env: 'development'
         })
+
         // default mocks - just enough to render the first page without error
+        /** @type {RemoteResource} */
+        const resource = {
+            id: 'privacy-configuration',
+            url: 'https://example.com/macos-config.json',
+            name: 'Privacy Config',
+            current: {
+                source: {
+                    remote: {
+                        url: 'https://example.com/macos-config.json',
+                        fetchedAt: '2023-07-05T12:34:56Z'
+                    }
+                },
+                contents: '{ "foo": "bar" }',
+                contentType: 'application/json'
+            }
+        }
+
         /** @type {GetFeaturesResponse} */
         const getFeatures = {
             features: {
                 remoteResources: {
-                    resources: [
-                        {
-                            id: 'privacy-configuration',
-                            url: 'https://example.com/macos-config.json',
-                            name: 'Privacy Config',
-                            current: {
-                                source: {
-                                    remote: {
-                                        url: 'https://example.com/macos-config.json',
-                                        fetchedAt: '2023-07-05T12:34:56Z'
-                                    }
-                                },
-                                contents: '{ "foo": "bar" }',
-                                contentType: 'application/json'
-                            }
-                        }
-                    ]
+                    resources: [resource]
                 }
             }
         }
 
         this.mocks.defaultResponses({
-            getFeatures
+            getFeatures,
+            updateResource: resource
         })
 
         page.on('console', (msg) => {
@@ -76,14 +80,15 @@ export class DebugToolsPage {
      */
     async installRemoteMocks () {
         // default: https://staticcdn.duckduckgo.com/trackerblocking/config/v2/macos-config.json
-        await this.page.route('https://staticcdn.duckduckgo.com/trackerblocking/**', (route /* req */) => {
-            // const url = new URL(req.url())
-            return route.fulfill({
-                status: 200,
-                json: {
-                    hello: 'world'
-                }
-            })
+        await this.page.route('https://example.com/**', (route, req) => {
+            const url = new URL(req.url())
+            if (url.pathname === '/override.json') {
+                return route.fulfill({
+                    status: 200,
+                    json: {}
+                })
+            }
+            return route.continue()
         })
     }
 
@@ -120,6 +125,24 @@ export class DebugToolsPage {
             source: {
                 debugTools: {
                     content: '{ "foo": "baz" }'
+                }
+            }
+        })
+    }
+
+    async setRemoteUrl () {
+        await this.page.locator('#remote-resource-url input[name="resource-url"]')
+            .fill('https://example.com/override.json')
+    }
+
+    async savesNewRemoteUrl () {
+        await this.page.locator('#remote-resource-url button[type="submit"]').click()
+        const calls = await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
+        expect(calls[0].payload.params).toMatchObject({
+            id: 'privacy-configuration',
+            source: {
+                remote: {
+                    url: 'https://example.com/override.json'
                 }
             }
         })
