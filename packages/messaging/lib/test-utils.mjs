@@ -13,6 +13,7 @@
  * @param {{
  *  messagingContext: import('../index.js').MessagingContext,
  *  responses: Record<string, any>
+ *  errors: Record<string, any>
  * }} params
  */
 export function mockWindowsMessaging(params) {

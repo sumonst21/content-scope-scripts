@@ -1,17 +1,22 @@
-import { h } from 'preact'
-import { useRef } from 'preact/hooks'
-
 /**
  * @typedef{ import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
  * @typedef{ import('../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  */
 
+import { useRef } from 'react'
+
 /**
- * @param {{resource: RemoteResource, save: (res: UpdateResourceParams) => void, children?: import("preact").ComponentChildren }} props
+ * @param {{
+ *    resource: RemoteResource;
+ *    save: (res: UpdateResourceParams) => void;
+ *    pending: boolean;
+ * }} props
  */
 export function Editor (props) {
-    const ref = /** @type {import("preact").RefObject<HTMLTextAreaElement>} */(useRef(null))
-    function save () {
+    console.log('TODO: wire up the Editor and pump new values in', props.resource.current.contents)
+    const ref = useRef(null)
+    function save (e) {
+        e.preventDefault()
         if (!ref) return
         const next = ref.current?.value
         props.save({
@@ -27,17 +32,19 @@ export function Editor (props) {
         <p>
             {props.resource.url}
         </p>
-        <div>
-            <textarea
-                defaultValue={props.resource.current.contents}
-                ref={ref}
-                spellcheck={false}
-                style={{ width: '100%', height: '50vh', fontSize: '12px' }}
-                name=""
-                id="resource-editor"
-                cols={30}
-                rows={10}></textarea>
-        </div>
-        <button type={'button'} onClick={save}>Save + Apply</button>
+        <form onSubmit={save}>
+            <fieldset style={{ border: 'none', padding: 0 }} disabled={props.pending}>
+                <textarea
+                    defaultValue={props.resource.current.contents}
+                    ref={ref}
+                    spellCheck={false}
+                    style={{ width: '100%', height: '50vh', fontSize: '12px' }}
+                    name=""
+                    id="resource-editor"
+                    cols={30}
+                    rows={10}></textarea>
+                <button type={'submit'}>{props.pending ? 'saving...' : 'Save + Apply'}</button>
+            </fieldset>
+        </form>
     </div>
 }

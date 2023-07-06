@@ -1,6 +1,5 @@
-import { h } from 'preact'
-import { useRef, useState } from 'preact/hooks'
 import * as z from 'zod'
+import { useRef, useState } from 'react'
 
 /**
  * @typedef{ import('../../../schema/__generated__/schema.types').RemoteResource} RemoteResource
@@ -8,10 +7,14 @@ import * as z from 'zod'
  */
 
 /**
- * @param {{resource: RemoteResource, save: (res: UpdateResourceParams) => void, children?: import('preact').ComponentChildren }} props
+ * @param {{
+ *   resource: RemoteResource;
+ *   save: (res: UpdateResourceParams) => void;
+ *   pending: boolean;
+ * }} props
  */
 export function RemoteResourceUrl (props) {
-    const ref = /** @type {import('preact').RefObject<HTMLInputElement>} */(useRef(null))
+    const ref = useRef(null)
     const [value, setValue] = useState(props.resource.url)
 
     function save (e) {
@@ -34,7 +37,7 @@ export function RemoteResourceUrl (props) {
 
     return <div>
         <form onSubmit={save} id="remote-resource-url">
-            <div>
+            <fieldset style={{ border: 'none', padding: 0 }} disabled={props.pending}>
                 <input
                     value={value}
                     onInput={(e) => setValue(/** @type {any} */(e.target).value || '')}
@@ -44,8 +47,10 @@ export function RemoteResourceUrl (props) {
                     }}
                     name="resource-url"
                 />
-            </div>
-            <button type={'submit'}>Update remote url</button>
+            </fieldset>
+            <button type={'submit'}>{props.pending ? 'saving....' : 'Update remote url'}</button>
+            <small style={{ color: 'gray' }}>Note: refresh to see changes in main editor after updating remote</small>
+
         </form>
     </div>
 }

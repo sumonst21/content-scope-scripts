@@ -124,7 +124,8 @@ export class HarmfulApisSpec {
                 context: 'contentScopeScripts',
                 featureName: 'n/a'
             },
-            responses: {}
+            responses: {},
+            errors: {}
         })
 
         // attach the JS
