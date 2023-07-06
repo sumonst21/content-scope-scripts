@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test'
 import { Mocks } from './mocks.js'
 import { perPlatform } from '../../../../integration-test/playwright/type-helpers.mjs'
+import { mockErrors } from '@duckduckgo/messaging/lib/test-utils.mjs'
 
 /**
  * @typedef {import('../../../../integration-test/playwright/type-helpers.mjs').Build} Build
@@ -123,8 +124,12 @@ export class DebugToolsPage {
             .fill('{ "foo": "baz" }')
     }
 
-    async saves () {
+    async submitsEditorSave () {
         await this.page.getByRole('button', { name: 'Save + Apply' }).click()
+    }
+
+    async saves () {
+        await this.submitsEditorSave()
         const calls = await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
         expect(calls[0].payload.params).toMatchObject({
             id: 'privacy-configuration',
@@ -141,8 +146,12 @@ export class DebugToolsPage {
             .fill('https://example.com/override.json')
     }
 
-    async savesNewRemoteUrl () {
+    async submitsResourceForm () {
         await this.page.locator('#remote-resource-url button[type="submit"]').click()
+    }
+
+    async savesNewRemoteUrl () {
+        await this.submitsResourceForm()
         const calls = await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
         expect(calls[0].payload.params).toMatchObject({
             id: 'privacy-configuration',
@@ -154,6 +163,29 @@ export class DebugToolsPage {
         })
         const value = await this.page.locator('#resource-editor').inputValue()
         expect(value).toBe('{ "updated": true }')
+    }
+
+    /**
+     * @param {string} msg
+     */
+    async showsErrorText (msg) {
+        await this.page.getByText(msg).waitFor()
+    }
+
+    /**
+     * @param {object} params
+     * @param {string} params.method
+     * @param {string} params.message
+     */
+    async willReceiveError (params) {
+        const { method, message } = params
+        await this.page.evaluate(mockErrors, {
+            errors: {
+                [method]: {
+                    message
+                }
+            }
+        })
     }
 
     /**

@@ -144,17 +144,23 @@ class MockImpl {
  */
 function App (props) {
     const [resource, setResource] = useState(props.getFeatures.features.remoteResources.resources[0])
+    const [error, setError] = useState(null)
 
     /**
      * @param {UpdateResourceParams} resp
      */
     async function save (resp) {
-        const response = await props.messages.updateResource(resp)
-        setResource(response)
+        try {
+            setError(null)
+            const response = await props.messages.updateResource(resp)
+            setResource(response)
+        } catch (e) {
+            setError(e.message)
+        }
     }
 
     return <main data-loaded="true">
-        <h1>Hello from Debug Tools</h1>
+        {error ? <p style={{ color: 'red' }}>{error}</p> : null}
         <RemoteResourceUrl resource={resource} save={save}></RemoteResourceUrl>
         <Editor resource={resource} save={save}></Editor>
     </main>

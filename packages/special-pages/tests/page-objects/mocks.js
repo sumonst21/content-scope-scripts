@@ -47,7 +47,8 @@ export class Mocks {
             apple: async () => {
                 await this.page.addInitScript(mockWebkitMessaging, {
                     messagingContext: this.messagingContext,
-                    responses: this._defaultResponses
+                    responses: this._defaultResponses,
+                    errors: {}
                 })
             }
         })

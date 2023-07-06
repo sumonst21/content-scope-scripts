@@ -18,6 +18,7 @@
 export function mockWindowsMessaging(params) {
     window.__playwright_01 = {
         mockResponses: params.responses,
+        errorResponses: {},
         subscriptionEvents: [],
         mocks: {
             outgoing: []
@@ -112,11 +113,13 @@ export function mockWindowsMessaging(params) {
  * @param {{
  *  messagingContext: import('../index.js').MessagingContext,
  *  responses: Record<string, any>
+ *  errors: Record<string, any>
  * }} params
  */
 export function mockWebkitMessaging(params) {
     window.__playwright_01 = {
         mockResponses: params.responses,
+        errorResponses: {},
         subscriptionEvents: [],
         mocks: {
             outgoing: []
@@ -139,6 +142,11 @@ export function mockWebkitMessaging(params) {
                     // if it's a notification, simulate the empty response and don't check for a response
                     if (!('id' in msg)) {
                         return JSON.stringify({});
+                    }
+
+                    if (msg.method in window.__playwright_01.errorResponses) {
+                        const error = window.__playwright_01.errorResponses[msg.method];
+                        throw new Error(error.message)
                     }
 
                     if (!(msg.method in window.__playwright_01.mockResponses)) {
@@ -171,6 +179,17 @@ export function mockResponses(params) {
     window.__playwright_01.mockResponses = {
         ...window.__playwright_01.mockResponses,
         ...params.responses
+    }
+}
+
+/**
+ * @param {object} params
+ * @param {Record<string, import("../index.js").MessageError>} params.errors
+ */
+export function mockErrors(params) {
+    window.__playwright_01.errorResponses = {
+        ...window.__playwright_01.errorResponses,
+        ...params.errors
     }
 }
 
