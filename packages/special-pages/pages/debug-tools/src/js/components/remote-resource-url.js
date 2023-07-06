@@ -37,7 +37,7 @@ export function RemoteResourceUrl (props) {
             <div>
                 <input
                     value={value}
-                    onInput={(e) => setValue(e.target?.value || '')}
+                    onInput={(e) => setValue(/** @type {any} */(e.target).value || '')}
                     style={{
                         width: '100%',
                         fontSize: '12px'
@@ -45,7 +45,7 @@ export function RemoteResourceUrl (props) {
                     name="resource-url"
                 />
             </div>
-            <button type={'submit'}>Save + Apply</button>
+            <button type={'submit'}>Update remote url</button>
         </form>
     </div>
 }

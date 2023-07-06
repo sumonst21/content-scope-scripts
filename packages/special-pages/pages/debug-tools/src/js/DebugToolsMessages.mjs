@@ -35,11 +35,9 @@ export class DebugToolsMessages {
     async updateResource (params) {
         const outgoing = updateResourceParamsSchema.parse(params)
         const response = await this.messaging.request('updateResource', outgoing)
-        const featuresResponse = getFeaturesResponseSchema.parse(response)
-        const matching = featuresResponse.features.remoteResources.resources.find(x => x.id == params.id);
-        if (!matching) {
-            throw new Error('todo! how can we get here?')
-        }
-        return matching
+        const featuresResponse = remoteResourceSchema.safeParse(response)
+        if (featuresResponse.success) return featuresResponse.data
+        console.log(featuresResponse.error)
+        throw new Error('todo: error handling');
     }
 }

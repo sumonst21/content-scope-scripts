@@ -14,12 +14,11 @@ test.describe.only('debug tools', () => {
         await dt.editsPreview()
         await dt.saves()
     })
-    test.only('sets a new remote url', async ({ page }, workerInfo) => {
+    test('sets a new remote url', async ({ page }, workerInfo) => {
         const dt = DebugToolsPage.create(page, workerInfo)
         await dt.openRemoteResourceEditor()
         await dt.hasLoaded()
         await dt.setRemoteUrl()
         await dt.savesNewRemoteUrl()
-        await page.pause()
     })
 })

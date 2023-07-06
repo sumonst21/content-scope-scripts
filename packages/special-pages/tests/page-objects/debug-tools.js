@@ -52,24 +52,15 @@ export class DebugToolsPage {
             }
         }
 
-        /** @type {GetFeaturesResponse} */
-        const updateResource = {
-            features: {
-                remoteResources: {
-                    resources: [{
-                        ...resource,
-                        current: {
-                            ...resource.current,
-                            contents: '{ "updated": true }'
-                        }
-                    }]
-                }
-            }
-        }
-
         this.mocks.defaultResponses({
             getFeatures,
-            updateResource
+            updateResource: {
+                ...resource,
+                current: {
+                    ...resource.current,
+                    contents: '{ "updated": true }'
+                }
+            }
         })
 
         page.on('console', (msg) => {
