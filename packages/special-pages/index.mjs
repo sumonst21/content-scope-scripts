@@ -121,6 +121,7 @@ for (const buildJob of buildJobs) {
             entryPoints: [buildJob.src],
             outfile: buildJob.dest,
             bundle: true,
+            sourcemap: "inline",
             format: 'iife',
             jsxFactory: 'h',
             jsxFragment: 'Fragment',

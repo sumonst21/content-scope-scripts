@@ -22,14 +22,17 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.35.1",
-    "http-server": "^14.1.1",
     "@duckduckgo/messaging": "*",
+    "@playwright/test": "^1.35.1",
     "esbuild": "^0.17.19",
-    "web-resource-inliner": "^6.0.1",
-    "ts-to-zod": "^3.1.3",
-    "zod": "^3.6.0",
+    "http-server": "^14.1.1",
     "json-schema-to-typescript": "^13.0.2",
-    "preact": "^10.15.1"
+    "preact": "^10.15.1",
+    "ts-to-zod": "^3.1.3",
+    "web-resource-inliner": "^6.0.1",
+    "zod": "^3.6.0"
+  },
+  "dependencies": {
+    "preact-hooks": "^0.0.0"
   }
 }

@@ -13,7 +13,7 @@
                 "fetchedAt": "2023-07-05T12:34:56Z"
               }
             },
-            "contents": "<full json string here>",
+            "contents": "{ \"foo\": \"bar\" }",
             "contentType": "application/json"
           }
         },
@@ -27,7 +27,7 @@
                 "modifiedAt": "2023-07-05T12:34:56Z"
               }
             },
-            "contents": "<full json string here>",
+            "contents": "{ \"foo\": \"bar\" }",
             "contentType": "application/json"
           }
         },
@@ -42,7 +42,7 @@
                 "fetchedAt": "2023-07-05T12:34:56Z"
               }
             },
-            "contents": "<full json string here>",
+            "contents": "{ \"foo\": \"bar\" }",
             "contentType": "application/json"
           }
         }

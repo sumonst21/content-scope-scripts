@@ -1,11 +1,11 @@
+import { expect } from '@playwright/test'
 import { Mocks } from './mocks.js'
 import { perPlatform } from '../../../../integration-test/playwright/type-helpers.mjs'
-import { getFeaturesResponseSchema } from '../../pages/debug-tools/schema/__generated__/schema.parsers.mjs'
 
 /**
  * @typedef {import('../../../../integration-test/playwright/type-helpers.mjs').Build} Build
  * @typedef {import('../../../../integration-test/playwright/type-helpers.mjs').PlatformInfo} PlatformInfo
- * @typedef {import('../../pages/debug-tools/schema/__generated__/schema.types')} GetFeaturesResponse
+ * @typedef {import('../../pages/debug-tools/schema/__generated__/schema.types').GetFeaturesResponse} GetFeaturesResponse
  */
 
 export class DebugToolsPage {
@@ -24,16 +24,35 @@ export class DebugToolsPage {
             env: 'development'
         })
         // default mocks - just enough to render the first page without error
-        this.mocks.defaultResponses({
-            getFeatures: {
-                /** @type {GetFeaturesResponse} */
-                features: {
-                    remoteResources: {
-                        resources: []
-                    }
+        /** @type {GetFeaturesResponse} */
+        const getFeatures = {
+            features: {
+                remoteResources: {
+                    resources: [
+                        {
+                            id: 'privacy-configuration',
+                            url: 'https://example.com/macos-config.json',
+                            name: 'Privacy Config',
+                            current: {
+                                source: {
+                                    remote: {
+                                        url: 'https://example.com/macos-config.json',
+                                        fetchedAt: '2023-07-05T12:34:56Z'
+                                    }
+                                },
+                                contents: '{ "foo": "bar" }',
+                                contentType: 'application/json'
+                            }
+                        }
+                    ]
                 }
             }
+        }
+
+        this.mocks.defaultResponses({
+            getFeatures
         })
+
         page.on('console', (msg) => {
             console.log(msg.type(), msg.text())
         })
@@ -82,11 +101,28 @@ export class DebugToolsPage {
     async hasLoaded () {
         // this makes sure the JS is compiled/loaded
         await this.page.locator('main[data-loaded=true]').waitFor()
-        const html = await this.page.locator('code').innerHTML()
+    }
 
-        // these will throw if it's invalid / absent, which is fine for now
-        const asJson = JSON.parse(html)
-        getFeaturesResponseSchema.parse(asJson)
+    /**
+     *
+     */
+    async editsPreview () {
+        // this makes sure the JS is compiled/loaded
+        await this.page.locator('#resource-editor')
+            .fill('{ "foo": "baz" }')
+    }
+
+    async saves () {
+        await this.page.getByRole('button', { name: 'Save + Apply' }).click()
+        const calls = await this.mocks.waitForCallCount({ method: 'updateResource', count: 1 })
+        expect(calls[0].payload.params).toMatchObject({
+            id: 'privacy-configuration',
+            source: {
+                debugTools: {
+                    content: '{ "foo": "baz" }'
+                }
+            }
+        })
     }
 
     /**

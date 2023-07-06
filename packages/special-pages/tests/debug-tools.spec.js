@@ -7,4 +7,11 @@ test.describe.only('debug tools', () => {
         await dt.openRemoteResourceEditor()
         await dt.hasLoaded()
     })
+    test('updates a resource', async ({ page }, workerInfo) => {
+        const dt = DebugToolsPage.create(page, workerInfo)
+        await dt.openRemoteResourceEditor()
+        await dt.hasLoaded()
+        await dt.editsPreview()
+        await dt.saves()
+    })
 })

@@ -11,6 +11,7 @@ import {
  * @param {ImportMeta['env']} opts.env
  * @param {ImportMeta['injectName']} opts.injectName
  * @param {string} opts.featureName
+ * @param {() => import("../../messaging/index.js").MessagingTransport} [opts.mockImpl]
  */
 export function createSpecialPagesMessaging (opts) {
     const messageContext = new MessagingContext({
@@ -37,22 +38,8 @@ export function createSpecialPagesMessaging (opts) {
             webkitMessageHandlerNames: ['specialPages']
         })
         return new Messaging(messageContext, opts)
-    } else if (opts.injectName === 'integration') {
-        const config = new TestTransportConfig({
-            notify (msg) {
-                console.log(msg)
-            },
-            request: (msg) => {
-                console.log(msg)
-                return Promise.resolve(null)
-            },
-            subscribe (msg) {
-                console.log(msg)
-                return () => {
-                    console.log('teardown')
-                }
-            }
-        })
+    } else if (opts.injectName === 'integration' && opts.mockImpl) {
+        const config = new TestTransportConfig(opts.mockImpl())
         return new Messaging(messageContext, config)
     }
     throw new Error('unreachable - platform not supported')
