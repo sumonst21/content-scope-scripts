@@ -52,9 +52,24 @@ export class DebugToolsPage {
             }
         }
 
+        /** @type {GetFeaturesResponse} */
+        const updateResource = {
+            features: {
+                remoteResources: {
+                    resources: [{
+                        ...resource,
+                        current: {
+                            ...resource.current,
+                            contents: '{ "updated": true }'
+                        }
+                    }]
+                }
+            }
+        }
+
         this.mocks.defaultResponses({
             getFeatures,
-            updateResource: resource
+            updateResource
         })
 
         page.on('console', (msg) => {
@@ -146,6 +161,8 @@ export class DebugToolsPage {
                 }
             }
         })
+        const value = await this.page.locator('#resource-editor').inputValue()
+        expect(value).toBe('{ "updated": true }')
     }
 
     /**

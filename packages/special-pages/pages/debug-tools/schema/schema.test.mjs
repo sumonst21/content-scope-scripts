@@ -53,7 +53,15 @@ describe('__fixtures__', () => {
                 if (!content) throw new Error('missing content');
                 const clone = JSON.parse(JSON.stringify(getFeatures.features.remoteResources.resources[0]))
                 clone.current.contents = content;
-                return clone
+                /** @type {import("./__generated__/schema.types").GetFeaturesResponse} */
+                const response = {
+                    features: {
+                        remoteResources: {
+                            resources: [clone]
+                        }
+                    }
+                }
+                return response
             },
             notify: () => {
 
