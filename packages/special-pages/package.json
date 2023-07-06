@@ -5,8 +5,8 @@
   "description": "A collection of HTML/CSS/JS pages that can be loaded into privileged environments, like about: pages",
   "main": "index.js",
   "scripts": {
-    "build": "npm run schema && node index.mjs",
-    "build.dev": "npm run schema && node index.mjs --env development",
+    "build": "node index.mjs",
+    "build.dev": "node index.mjs --env development",
     "test": "playwright test",
     "test.schema": "node pages/debug-tools/schema/schema.test.mjs",
     "test.windows": "npm run test -- --project duckplayer-windows",
