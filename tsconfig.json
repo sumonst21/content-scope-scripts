@@ -32,6 +32,7 @@
     "packages/special-pages/pages/**/public",
     "packages/special-pages/playwright-report",
     "packages/special-pages/test-results",
+    "packages/special-pages/pages/debug-tools/editor/__generated__",
     "docs"
   ]
 }
