@@ -44,7 +44,7 @@ export const getMachine = () => createMachine({
                     always: [
                         {
                             target: 'loading resource',
-                            actions: 'assignResource'
+                            actions: ['assignResource', 'raiseUpdated']
                         }
                     ]
                 },
@@ -103,7 +103,11 @@ export const getMachine = () => createMachine({
                                         onDone: [
                                             {
                                                 target: 'editorEnabled',
-                                                actions: ['updateCurrentResource', 'clearErrors']
+                                                actions: [
+                                                    'updateCurrentResource',
+                                                    'clearErrors',
+                                                    'raiseUpdated'
+                                                ]
                                             }
                                         ],
                                         onError: [
@@ -129,7 +133,8 @@ export const getMachine = () => createMachine({
                                                 target: 'editorEnabled',
                                                 actions: [
                                                     'updateCurrentResource',
-                                                    'clearErrors'
+                                                    'clearErrors',
+                                                    'raiseUpdated'
                                                 ],
                                                 description: "in this response, we'll have access to the updated 'remote resource', so we can use it directly"
                                             }

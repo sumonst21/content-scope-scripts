@@ -20,7 +20,7 @@ export class MockImpl {
         const formattedDate = now.toISOString()
         switch (msg.method) {
         case 'getFeatures': {
-            const remote = await fetch('https://localhost:3000/trackerblocking/config/v2/macos-config.json')
+            const remote = await fetch('macos-config.json')
                 .then(x => x.text())
 
             /** @type {GetFeaturesResponse} */

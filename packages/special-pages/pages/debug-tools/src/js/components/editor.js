@@ -3,7 +3,8 @@
  * @typedef{ import('../../../schema/__generated__/schema.types').UpdateResourceParams} UpdateResourceParams
  */
 
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import { AppMachineContext } from './app'
 
 /**
  * @param {{
@@ -13,11 +14,12 @@ import { useRef } from 'react'
  * }} props
  */
 export function Editor (props) {
-    console.log('TODO: wire up the Editor and pump new values in', props.resource.current.contents)
+    // console.log('TODO: wire up the Editor and pump new values in', props.resource.current.contents)
     const ref = useRef(null)
     function save (e) {
         e.preventDefault()
         if (!ref) return
+        // @ts-expect-error - react types
         const next = ref.current?.value
         props.save({
             id: props.resource.id,
@@ -28,9 +30,31 @@ export function Editor (props) {
             }
         })
     }
+    const display = (() => {
+        if ('remote' in props.resource.current.source) {
+            return `[remote] ${props.resource.current.source.remote.url}`
+        }
+        if ('debugTools' in props.resource.current.source) {
+            return '<debugTools>'
+        }
+        throw new Error('unreachable')
+    })()
+
+    // const a = AppMachineContext.useSelector((state) => {
+    //     return state.context.
+    // })
+    const a = AppMachineContext.useActorRef()
+    useEffect(() => {
+        const sub = a.subscribe((state) => {
+            console.log(state)
+        })
+        return () => {
+            sub.unsubscribe()
+        }
+    }, [a])
     return <div>
         <p>
-            {props.resource.url}
+            {display}
         </p>
         <form onSubmit={save}>
             <fieldset style={{ border: 'none', padding: 0 }} disabled={props.pending}>

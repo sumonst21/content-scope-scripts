@@ -75,6 +75,9 @@ export function withMessages (baseMachine: ReturnType<typeof getMachine>, messag
                         }
                     })
                 }
+            }),
+            raiseUpdated: assign({
+                resourceKey: (ctx) => ((ctx as any).resourceKey ?? 0) + 1
             })
         }
     })

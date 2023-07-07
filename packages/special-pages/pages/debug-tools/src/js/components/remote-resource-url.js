@@ -15,7 +15,15 @@ import { useRef, useState } from 'react'
  */
 export function RemoteResourceUrl (props) {
     const ref = useRef(null)
-    const [value, setValue] = useState(props.resource.url)
+    const [value, setValue] = useState(() => {
+        if ('remote' in props.resource.current.source) {
+            return props.resource.current.source.remote.url
+        }
+        if ('debugTools' in props.resource.current.source) {
+            return '<debugTools>'
+        }
+        throw new Error('unreachable')
+    })
 
     function save (e) {
         e.preventDefault()
@@ -50,7 +58,6 @@ export function RemoteResourceUrl (props) {
             </fieldset>
             <button type={'submit'}>{props.pending ? 'saving....' : 'Update remote url'}</button>
             <small style={{ color: 'gray' }}>Note: refresh to see changes in main editor after updating remote</small>
-
         </form>
     </div>
 }
