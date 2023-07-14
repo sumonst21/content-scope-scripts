@@ -60,6 +60,12 @@ export class DuckplayerOverlays {
         await this.page.getByRole('button', { name: 'Reject the use of cookies and other data for the purposes described' }).click()
     }
 
+    async gotoYoutubeSearchPAge () {
+        await this.page.goto('https://www.youtube.com/results?search_query=taylor+swift')
+        // cookie banner
+        await this.page.getByRole('button', { name: 'Reject the use of cookies and other data for the purposes described' }).click()
+    }
+
     async clicksFirstShortsThumbnail () {
         await this.page.locator('[href*="/shorts"] img').first().click({ force: true })
     }

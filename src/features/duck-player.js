@@ -33,9 +33,10 @@
 import ContentFeature from '../content-feature.js'
 
 import { DuckPlayerOverlayMessages, OpenInDuckPlayerMsg, Pixel } from './duckplayer/overlay-messages.js'
-import { Environment, initOverlays } from './duckplayer/overlays.js'
+import { Environment } from './duckplayer/overlays.js'
 import { isBeingFramed } from '../utils.js'
 import { createMessaging } from '../create-messaging.js'
+import { initOverlaysV2 } from './duckplayer/overlays-v2.js'
 
 /**
  * @typedef UserValues - A way to communicate user settings
@@ -71,6 +72,7 @@ export default class DuckPlayerFeature extends ContentFeature {
          */
         const overlaySettings = this.getFeatureSetting('overlays')
         const overlaysEnabled = overlaySettings?.youtube?.state === 'enabled'
+        const overlaysVersion = overlaySettings?.youtube?.version || '1'
 
         /**
          * Serp proxy
@@ -98,7 +100,12 @@ export default class DuckPlayerFeature extends ContentFeature {
         })
 
         if (overlaysEnabled) {
-            initOverlays(env, comms)
+            if (overlaysVersion === '2') {
+                initOverlaysV2(env, comms)
+            } else {
+                initOverlaysV2(env, comms)
+                // initOverlays(env, comms)
+            }
         } else if (serpProxyEnabled) {
             comms.serpProxy()
         }
