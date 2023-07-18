@@ -1,7 +1,7 @@
 import { test } from '@playwright/test'
 import { DuckplayerOverlays } from './page-objects/duckplayer-overlays.js'
 
-test.describe('Duck Player Thumbnail Overlays on YouTube.com', () => {
+test.describe('Thumbnail Overlays', () => {
     test('Overlays show on thumbnails when enabled', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 
@@ -120,7 +120,7 @@ test.describe('Duck Player Thumbnail Overlays on YouTube.com', () => {
     })
 })
 
-test.describe('Duck Player Overlays on Video Player in YouTube.com', () => {
+test.describe('Video Player overlays', () => {
     test('Overlay blocks video from playing', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 
@@ -165,7 +165,7 @@ test.describe('Duck Player Overlays on Video Player in YouTube.com', () => {
 
         // No small overlays
         await overlays.overlaysDontShow()
-        // // No video overlay
+        // No video overlay
         await overlays.videoOverlayDoesntShow()
     })
     test('Small overlay is displayed on video', async ({ page }, workerInfo) => {
