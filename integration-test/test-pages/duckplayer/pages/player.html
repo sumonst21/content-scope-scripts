@@ -125,7 +125,6 @@
                 const current = new URL(window.location.href);
                 current.searchParams.set('v', params.get('v'));
                 history.pushState('','',current.toString());
-                e.preventDefault();
                 return;
             }
         }

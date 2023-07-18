@@ -1,6 +1,7 @@
 import { DomState } from './util.js'
 import { Thumbnails } from './thumbnails.js'
 import { VideoOverlayManager } from './video-overlay-manager.js'
+import { registerCustomElements } from './components/index.js'
 
 /**
  * @typedef OverlaysFeatureSettings - a representation of what is expected from remote configuration
@@ -39,6 +40,9 @@ export async function initOverlaysV2 (environment, messages) {
         }
     }
 
+    // bind early to attach all listeners
+    const domState = new DomState()
+
     /** @type {import("../duck-player.js").UserValues} */
     let userValues
     try {
@@ -61,17 +65,29 @@ export async function initOverlaysV2 (environment, messages) {
     let videoOverlays = videoOverlaysFeatureFromSettings(userValues, settings, messages, environment)
 
     if (thumbnails || videoOverlays) {
-        const domState = new DomState()
+        if (videoOverlays) {
+            registerCustomElements()
+        }
         domState.onLoaded(() => {
             thumbnails?.init()
             videoOverlays?.init('page-load')
+
+            const title = document.head.querySelector('title')
+
+            const m = new MutationObserver((records) => {
+                for (const record of records) {
+                    if (record.target === title) {
+                        if (record.addedNodes) {
+                            videoOverlays?.watchForVideoBeingAdded({ via: 'title changed' })
+                        }
+                    }
+                }
+            })
+            m.observe(document.head, { childList: true, subtree: true })
         })
     }
 
-    /**
-     * Continue to listen for updated preferences and try to re-initiate
-     */
-    messages.onUserValuesChanged((userValues) => {
+    function update () {
         thumbnails?.destroy()
         videoOverlays?.destroy()
 
@@ -82,6 +98,14 @@ export async function initOverlaysV2 (environment, messages) {
         // re-create video overlay
         videoOverlays = videoOverlaysFeatureFromSettings(userValues, settings, messages, environment)
         videoOverlays?.init('preferences-changed')
+    }
+
+    /**
+     * Continue to listen for updated preferences and try to re-initiate
+     */
+    messages.onUserValuesChanged(_userValues => {
+        userValues = _userValues
+        // update()
     })
 }
 
@@ -118,7 +142,6 @@ function thumbnailsFeatureFromSettings (userPreferences, settings, messages) {
  * @returns {VideoOverlayManager | undefined}
  */
 function videoOverlaysFeatureFromSettings (userValues, settings, messages, environment) {
-    if ('disabled' in userValues.privatePlayerMode) return undefined
     if (settings.videoOverlays.state !== 'enabled') return undefined
 
     return new VideoOverlayManager(userValues, environment, messages)

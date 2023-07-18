@@ -36,7 +36,6 @@ export class VideoOverlayManager {
      * @param {'page-load' | 'preferences-changed'} trigger
      */
     init (trigger) {
-        registerCustomElements()
         if (trigger === 'page-load') {
             this.handleFirstPageLoad()
         } else if (trigger === 'preferences-changed') {
