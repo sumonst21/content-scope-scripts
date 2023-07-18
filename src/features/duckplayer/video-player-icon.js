@@ -1,11 +1,13 @@
 import { appendElement, applyEffect, execCleanups } from './util'
+import { IconOverlay } from './icon-overlay.js'
+import { OpenInDuckPlayerMsg } from './overlay-messages.js'
 
 export class VideoPlayerIcon {
     /**
-     * @param {import("./icon-overlay.js").IconOverlay} iconOverlay
+     * @param {import("./overlay-messages.js").DuckPlayerOverlayMessages} messages
      */
-    constructor (iconOverlay) {
-        this.iconOverlay = iconOverlay
+    constructor (messages) {
+        this.messages = messages
     }
 
     /**
@@ -29,10 +31,16 @@ export class VideoPlayerIcon {
      */
     appendOverlay (containerElement, params) {
         this.cleanup()
-        const href = params.toPrivatePlayerUrl()
-        const iconElement = this.iconOverlay.create('video-player', href, 'hidden')
 
         this.sideEffect('dax 🐥 icon overlay', () => {
+            const href = params.toPrivatePlayerUrl()
+
+            const icon = new IconOverlay({
+                onClick: (href) => {
+                    this.messages.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
+                }
+            })
+            const iconElement = icon.create('video-player', href, 'hidden')
             /**
              * Append the icon to the container element
              */

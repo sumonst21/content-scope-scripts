@@ -103,22 +103,11 @@ export class VideoOverlayManager {
             console.error('no container element')
             return
         }
-        let icon
-
         if (!this.videoPlayerIcon) {
-            icon = new IconOverlay({
-                onClick: (href) => {
-                    this.messages.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
-                }
-            })
-
             // append to the document
-            icon.appendHoverOverlay()
-            this.videoPlayerIcon = new VideoPlayerIcon(icon)
+            this.videoPlayerIcon = new VideoPlayerIcon(this.messages)
         }
-        if (icon) {
-            this.videoPlayerIcon.init(containerElement, params)
-        }
+        this.videoPlayerIcon.init(containerElement, params)
     }
 
     /**

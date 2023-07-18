@@ -147,29 +147,6 @@ export class IconOverlay {
     }
 
     /**
-     * Reposition the hover overlay on top of the current video element (in case
-     * of window resize if the hover overlay is visible)
-     */
-    repositionHoverOverlay () {
-        if (this.currentVideoElement && this.hoverOverlayVisible) {
-            this.moveHoverOverlayToVideoElement(this.currentVideoElement)
-        }
-    }
-
-    /**
-     * The this is absolutely positioned and at the end of the body tag. This means that if its placed in
-     * a scrollable playlist, it will "float" above the playlist on scroll.
-     */
-    hidePlaylistOverlayOnScroll (e) {
-        if (e?.target?.id === 'items') {
-            const overlay = this.getHoverOverlay()
-            if (overlay) {
-                this.hideOverlay(overlay)
-            }
-        }
-    }
-
-    /**
      * Hides the hover overlay element, but only if mouse pointer is outside of the hover overlay element
      */
     hideHoverOverlay (event, force) {
@@ -211,33 +188,6 @@ export class IconOverlay {
         addTrustedEventListener(document.body, 'mouseup', (event) => {
             this.hideHoverOverlay(event)
         })
-    }
-
-    /**
-     * Appends an overlay (currently just used for the video hover preview)
-     * @param {HTMLElement} videoElement - to append to
-     * @returns {boolean} - whether the overlay was appended or not
-     */
-    appendToVideo (videoElement) {
-        const appendOverlayToThumbnail = (videoElement) => {
-            if (videoElement) {
-                const privateUrl = VideoParams.fromHref(videoElement.href)?.toPrivatePlayerUrl()
-                const thumbSize = this.getThumbnailSize(videoElement)
-                if (privateUrl) {
-                    appendElement(videoElement, this.create(thumbSize, privateUrl))
-                    videoElement.classList.add('has-dgg-overlay')
-                }
-            }
-        }
-
-        const videoElementAlreadyHasOverlay = videoElement && videoElement.querySelector('div[class="ddg-overlay"]')
-
-        if (!videoElementAlreadyHasOverlay) {
-            appendOverlayToThumbnail(videoElement)
-            return true
-        }
-
-        return false
     }
 
     getThumbnailSize (videoElement) {

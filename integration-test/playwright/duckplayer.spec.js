@@ -260,7 +260,7 @@ test.describe('Video Player overlays', () => {
         await overlays.watchInDuckPlayer()
         await overlays.userSettingWasUpdatedTo('enabled') // updated
     })
-    test.only('Selecting \'watch here\'', async ({ page }, workerInfo) => {
+    test('Selecting \'watch here\'', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 
         // Given overlays feature is enabled
@@ -271,7 +271,7 @@ test.describe('Video Player overlays', () => {
         await overlays.gotoPlayerPage()
 
         await overlays.watchHere()
-        await overlays.singleOverlayExists()
+        await overlays.secondOverlayExistsOnVideo()
     })
     test('Selecting \'watch here\' + remember', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)

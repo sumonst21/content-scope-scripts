@@ -229,9 +229,10 @@ export class DuckplayerOverlays {
         await this.page.locator('.ddg-play-privately').waitFor({ state: 'attached', timeout: 1000 })
     }
 
-    async singleOverlayExists () {
+    async secondOverlayExistsOnVideo () {
         const elements = await this.page.$$('.ddg-play-privately')
-        expect(elements.length).toBe(1)
+        expect(elements.length).toBe(2)
+        await this.page.locator('#player .html5-video-player .ddg-overlay[data-size="video-player"]').waitFor({ timeout: 1000 })
     }
 
     async overlaysDontShow () {
