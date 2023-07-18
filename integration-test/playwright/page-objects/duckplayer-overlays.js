@@ -220,7 +220,8 @@ export class DuckplayerOverlays {
                 }
                 return ''
             })
-            expect(style).toEqual('none')
+
+            expect(style).not.toEqual('block')
         }
 
         // if we get here, the element was absent

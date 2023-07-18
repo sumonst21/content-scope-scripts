@@ -5,7 +5,7 @@ import { IconOverlay } from './icon-overlay-v2.js'
 /**
  * @typedef OverlaysFeatureSettings - a representation of what is expected from remote configuration
  * @property {object} selectors
- * @property {string} selectors.link - the CSS selector used to find links
+ * @property {string} selectors.thumbLink - the CSS selector used to find links
  * @property {string[]} selectors.excludedParents - CSS selectors of regions to exclude
  * @property {object} thumbnailOverlays
  * @property {string} thumbnailOverlays.state
@@ -15,13 +15,13 @@ import { IconOverlay } from './icon-overlay-v2.js'
 
 /**
  * @param {import("./overlays.js").Environment} environment - methods to read environment-sensitive things like the current URL etc
- * @param {import("./overlay-messages.js").DuckPlayerOverlayMessages} comms - methods to communicate with a native backend
+ * @param {import("./overlay-messages.js").DuckPlayerOverlayMessages} messages - methods to communicate with a native backend
  */
-export function initOverlaysV2 (environment, comms) {
+export async function initOverlaysV2 (environment, messages) {
     /** @type {OverlaysFeatureSettings} */
     const settings = {
         selectors: {
-            link: "a[href^='/watch']:has(img)",
+            thumbLink: "a[href^='/watch']:has(img)",
             excludedParents: [
                 '#playlist'
             ]
@@ -34,19 +34,25 @@ export function initOverlaysV2 (environment, comms) {
         }
     }
 
-    /**
-     * @type {import("../duck-player.js").UserValues}
-     */
-    const userPreferences = {
-        overlayInteracted: false, // not used for icon overlays
-        privatePlayerMode: { alwaysAsk: {} }
+    /** @type {import("../duck-player.js").UserValues} */
+    let userValues
+    try {
+        userValues = await messages.getUserValues()
+    } catch (e) {
+        console.error(e)
+        return
+    }
+
+    if (!userValues) {
+        console.log('cannot continue without user settings')
+        return
     }
 
     /**
      * Create the instance - this might fail if settings or user preferences prevent it
      * @type {Thumbnails|undefined}
      */
-    let thumbnails = fromSettings(userPreferences, settings, comms)
+    let thumbnails = fromSettings(userValues, settings, messages)
     if (thumbnails) {
         const domState = new DomState()
         domState.onLoaded(() => {
@@ -57,9 +63,10 @@ export function initOverlaysV2 (environment, comms) {
     /**
      * Continue to listen for updated preferences and try to re-initiate
      */
-    comms.onUserValuesChanged((userValues) => {
+    messages.onUserValuesChanged((userValues) => {
         thumbnails?.destroy()
-        thumbnails = fromSettings(userValues, settings, comms)
+        thumbnails = fromSettings(userValues, settings, messages)
+        thumbnails?.init()
     })
 }
 
@@ -131,7 +138,7 @@ class Thumbnails {
             const { selectors } = this.settings
 
             const handler = (e) => {
-                const element = findElementFromEvent(selectors.link, e)
+                const element = findElementFromEvent(selectors.thumbLink, e)
                 if (element && 'href' in element) {
                     const asLink = VideoParams.fromHref(element.href)?.toPrivatePlayerUrl()
                     if (asLink) {
@@ -166,7 +173,7 @@ class Thumbnails {
             document.head.appendChild(style)
             const { selectors } = this.settings
             const handler = (e) => {
-                const hoverElement = findElementFromEvent(selectors.link, e)
+                const hoverElement = findElementFromEvent(selectors.thumbLink, e)
 
                 // if it's not an element we care about
                 if (!hoverElement || !('href' in hoverElement)) {
@@ -179,7 +186,7 @@ class Thumbnails {
                 }
 
                 // ensure it doesn't contain sub-links
-                if (hoverElement.querySelector(this.settings.selectors.link)) {
+                if (hoverElement.querySelector(selectors.thumbLink)) {
                     return
                 }
 
@@ -201,6 +208,7 @@ class Thumbnails {
                     icon.moveHoverOverlayToVideoElement(hoverElement)
                 }
             }
+
             parentNode.addEventListener('mouseover', handler, true)
 
             return () => {
