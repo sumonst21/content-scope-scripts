@@ -3,7 +3,6 @@ import { applyEffect, execCleanups, VideoParams } from './util.js'
 import { VideoPlayerIcon } from './video-player-icon'
 import { DDGVideoOverlay } from './components/ddg-video-overlay.js'
 import { Pixel } from './overlay-messages.js'
-import { registerCustomElements } from './components/index.js'
 
 /**
  * Handle the switch between small & large overlays

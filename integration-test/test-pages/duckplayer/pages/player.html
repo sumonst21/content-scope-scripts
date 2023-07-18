@@ -75,11 +75,11 @@
     <div class="playlist"><h2>Up next</h2>
         <div class="playlist-items">
             <div class="thumbnails">
-                <a class="thumbnail" href="/watch?v=abc1"><img src="thumbnail-dark.jpg"></a>
-                <a class="thumbnail" href="/watch?v=abc2"><img src="thumbnail-dark.jpg"></a>
-                <a class="thumbnail" href="/watch?v=abc2"><img src="thumbnail-dark.jpg"></a>
-                <a class="thumbnail" href="/watch?v=abc3"><img src="thumbnail-dark.jpg"></a>
-                <a class="thumbnail" href="/watch?v=abc4"><img src="thumbnail-dark.jpg"></a>
+                <a class="thumbnail" title="video 1" href="/watch?v=abc1"><img src="thumbnail-dark.jpg"></a>
+                <a class="thumbnail" title="video 2" href="/watch?v=abc2"><img src="thumbnail-dark.jpg"></a>
+                <a class="thumbnail" title="video 3" href="/watch?v=abc2"><img src="thumbnail-dark.jpg"></a>
+                <a class="thumbnail" title="video 4" href="/watch?v=abc3"><img src="thumbnail-dark.jpg"></a>
+                <a class="thumbnail" title="video 5" href="/watch?v=abc4"><img src="thumbnail-dark.jpg"></a>
             </div>
         </div>
     </div>
@@ -125,6 +125,7 @@
                 const current = new URL(window.location.href);
                 current.searchParams.set('v', params.get('v'));
                 history.pushState('','',current.toString());
+                document.title = a.title;
                 return;
             }
         }

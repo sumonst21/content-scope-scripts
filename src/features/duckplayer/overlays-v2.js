@@ -105,7 +105,7 @@ export async function initOverlaysV2 (environment, messages) {
      */
     messages.onUserValuesChanged(_userValues => {
         userValues = _userValues
-        // update()
+        update()
     })
 }
 

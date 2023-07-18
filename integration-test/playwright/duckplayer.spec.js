@@ -201,7 +201,7 @@ test.describe('Video Player overlays', () => {
         await overlays.userSettingIs('always ask remembered')
         await overlays.gotoPlayerPage()
 
-        // Then then the overlay shows and blocks the video from playing
+        // Then the overlay shows and blocks the video from playing
         await overlays.smallOverlayShows()
     })
     test('Small overlay is shown when setting is \'enabled\'', async ({ page }, workerInfo) => {
