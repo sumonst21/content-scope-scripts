@@ -168,6 +168,29 @@ test.describe('Video Player overlays', () => {
         // No video overlay
         await overlays.videoOverlayDoesntShow()
     })
+    test.only('Overlay alters to suit new video id after navigation', async ({ page }, workerInfo) => {
+        const overlays = DuckplayerOverlays.create(page, workerInfo)
+
+        // Given overlays feature is enabled
+        await overlays.overlaysEnabled()
+
+        // And my setting is 'always ask'
+        await overlays.userSettingIs('always ask')
+        await overlays.gotoPlayerPage({ videoID: '123456' })
+
+        // then the overlay shows and blocks the video from playing
+        await overlays.overlayBlocksVideo()
+        await overlays.hasWatchLinkFor({ videoID: '123456' })
+
+        // now simulate going to another video from the related feed
+        await overlays.clickRelatedThumb({ videoID: 'abc1' })
+
+        // should still be visible
+        await overlays.overlayBlocksVideo()
+
+        // and watch link is updated
+        await overlays.hasWatchLinkFor({ videoID: 'abc1' })
+    })
     test('Small overlay is displayed on video', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 

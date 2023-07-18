@@ -359,6 +359,12 @@ export class Environment {
 
     getPlayerPageHref () {
         if (this.debug) {
+            const params = new URL(window.location.href).searchParams
+            if (params.has('v')) {
+                const base = new URL('/watch', 'https://youtube.com')
+                base.searchParams.set('v', params.get('v'))
+                return base.toString()
+            }
             return 'https://youtube.com/watch?v=123'
         }
         return window.location.href

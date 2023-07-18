@@ -85,12 +85,13 @@ export class DuckplayerOverlays {
     /**
      * @param {object} [params]
      * @param {"default" | "incremental-dom"} [params.variant]
+     * @param {string} [params.videoID]
      *  - we are replicating different strategies in the HTML to capture regressions/bugs
      */
     async gotoPlayerPage (params = {}) {
-        const { variant = 'default' } = params
+        const { variant = 'default', videoID = '123' } = params
         const urlParams = new URLSearchParams([
-            ['videoID', '123'],
+            ['v', videoID],
             ['variant', variant]
         ])
 
@@ -122,6 +123,26 @@ export class DuckplayerOverlays {
         await this.page
             .getByText('Duck Player provides a clean viewing experience without personalized ads and prevents viewing activity from influencing your YouTube recommendations.')
             .waitFor({ timeout: 100 })
+    }
+
+    /**
+     * @param {object} [params]
+     * @param {string} [params.videoID]
+     */
+    async hasWatchLinkFor (params = {}) {
+        const { videoID = '123' } = params
+        const link = await this.page.getByRole('link', { name: 'Watch in Duck Player' }).getAttribute('href')
+        expect(link).toEqual('duck://player/' + videoID)
+    }
+
+    /**
+     * @param {object} [params]
+     * @param {string} [params.videoID]
+     */
+    async clickRelatedThumb (params = {}) {
+        const { videoID = '123' } = params
+        await this.page.locator(`a[href="/watch?v=${videoID}"]`).click({ force: true })
+        await this.page.waitForURL((url) => url.searchParams.get('v') === videoID)
     }
 
     async smallOverlayShows () {
