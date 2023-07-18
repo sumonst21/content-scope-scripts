@@ -1,10 +1,11 @@
 import css from './assets/styles.css'
 import { applyEffect, execCleanups, VideoParams } from './util.js'
-import { IconOverlay } from './icon-overlay-v2.js'
+import { IconOverlay } from './icon-overlay.js'
+import { OpenInDuckPlayerMsg } from './overlay-messages.js'
 
 /**
  * @typedef ThumbnailSettings
- * @property {import("./overlays-v2.js").OverlaysFeatureSettings} settings
+ * @property {import("./overlays.js").OverlaysFeatureSettings} settings
  * @property {{interceptClicks: {}} | {showOverlays: {}}} mode
  */
 
@@ -15,12 +16,12 @@ import { IconOverlay } from './icon-overlay-v2.js'
 export class Thumbnails {
     /**
      * @param {ThumbnailSettings} params
-     * @param {import("../duck-player.js").DuckPlayerOverlayMessages} comms
+     * @param {import("../duck-player.js").DuckPlayerOverlayMessages} messages
      */
-    constructor (params, comms) {
+    constructor (params, messages) {
         this.settings = params.settings
         this.mode = params.mode
-        this.comms = comms
+        this.comms = messages
     }
 
     /**
@@ -40,11 +41,10 @@ export class Thumbnails {
      */
     interceptClicks () {
         this.sideEffect('intercepting clicks', () => {
+            const { selectors } = this.settings
             const parentNode = document.documentElement || document.body
 
-            const { selectors } = this.settings
-
-            const handler = (e) => {
+            const clickHandler = (e) => {
                 const element = findElementFromEvent(selectors.thumbLink, e)
                 if (element && 'href' in element) {
                     const asLink = VideoParams.fromHref(element.href)?.toPrivatePlayerUrl()
@@ -55,9 +55,11 @@ export class Thumbnails {
                     }
                 }
             }
-            parentNode.addEventListener('click', handler, true)
+
+            parentNode.addEventListener('click', clickHandler, true)
+
             return () => {
-                parentNode.removeEventListener('click', handler, true)
+                parentNode.removeEventListener('click', clickHandler, true)
             }
         })
     }
@@ -68,18 +70,25 @@ export class Thumbnails {
      */
     showOverlays () {
         this.sideEffect('showing overlays on hover', () => {
+            const { selectors } = this.settings
             const parentNode = document.documentElement || document.body
-            /**
-             * @param {MouseEvent} e
-             */
-            const icon = new IconOverlay(this.comms)
+
+            // create the icon state
+            const icon = new IconOverlay({
+                onClick: (href) => {
+                    this.comms.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
+                }
+            })
+
+            // append to the document
             icon.appendHoverOverlay()
 
+            // add the CSS to the head
             const style = document.createElement('style')
             style.textContent = css
             document.head.appendChild(style)
-            const { selectors } = this.settings
-            const handler = (e) => {
+
+            const mouseOverHandler = (e) => {
                 const hoverElement = findElementFromEvent(selectors.thumbLink, e)
 
                 // if it's not an element we care about
@@ -116,23 +125,23 @@ export class Thumbnails {
                 }
             }
 
-            parentNode.addEventListener('mouseover', handler, true)
+            parentNode.addEventListener('mouseover', mouseOverHandler, true)
 
             return () => {
-                parentNode.removeEventListener('mouseover', handler, true)
+                parentNode.removeEventListener('mouseover', mouseOverHandler, true)
                 icon.removeAll()
                 document.head.removeChild(style)
             }
         })
     }
 
+    /** @type {{fn: () => void, name: string}[]} */
+    _cleanups = []
+
     destroy () {
         execCleanups(this._cleanups)
         this._cleanups = []
     }
-
-    /** @type {{fn: () => void, name: string}[]} */
-    _cleanups = []
 
     /**
      * Wrap a side-effecting operation for easier debugging

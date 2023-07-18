@@ -1,7 +1,13 @@
 import { appendElement, applyEffect, execCleanups } from './util'
-import { IconOverlay } from './icon-overlay'
 
 export class VideoPlayerIcon {
+    /**
+     * @param {import("./icon-overlay.js").IconOverlay} iconOverlay
+     */
+    constructor (iconOverlay) {
+        this.iconOverlay = iconOverlay
+    }
+
     /**
      * This will only get called once everytime a new video is loaded.
      *
@@ -24,7 +30,7 @@ export class VideoPlayerIcon {
     appendOverlay (containerElement, params) {
         this.cleanup()
         const href = params.toPrivatePlayerUrl()
-        const iconElement = IconOverlay.create('video-player', href, 'hidden')
+        const iconElement = this.iconOverlay.create('video-player', href, 'hidden')
 
         this.sideEffect('dax 🐥 icon overlay', () => {
             /**

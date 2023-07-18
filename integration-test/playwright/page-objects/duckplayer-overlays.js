@@ -229,6 +229,11 @@ export class DuckplayerOverlays {
         await this.page.locator('.ddg-play-privately').waitFor({ state: 'attached', timeout: 1000 })
     }
 
+    async singleOverlayExists () {
+        const elements = await this.page.$$('.ddg-play-privately')
+        expect(elements.length).toBe(1)
+    }
+
     async overlaysDontShow () {
         const elements = await this.page.locator('.ddg-overlay.ddg-overlay-hover').count()
 

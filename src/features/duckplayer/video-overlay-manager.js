@@ -2,7 +2,8 @@
 import { applyEffect, execCleanups, VideoParams } from './util.js'
 import { VideoPlayerIcon } from './video-player-icon'
 import { DDGVideoOverlay } from './components/ddg-video-overlay.js'
-import { Pixel } from './overlay-messages.js'
+import { OpenInDuckPlayerMsg, Pixel } from './overlay-messages.js'
+import { IconOverlay } from './icon-overlay.js'
 
 /**
  * Handle the switch between small & large overlays
@@ -102,10 +103,22 @@ export class VideoOverlayManager {
             console.error('no container element')
             return
         }
+        let icon
+
         if (!this.videoPlayerIcon) {
-            this.videoPlayerIcon = new VideoPlayerIcon()
+            icon = new IconOverlay({
+                onClick: (href) => {
+                    this.messages.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
+                }
+            })
+
+            // append to the document
+            icon.appendHoverOverlay()
+            this.videoPlayerIcon = new VideoPlayerIcon(icon)
         }
-        this.videoPlayerIcon.init(containerElement, params)
+        if (icon) {
+            this.videoPlayerIcon.init(containerElement, params)
+        }
     }
 
     /**

@@ -168,7 +168,7 @@ test.describe('Video Player overlays', () => {
         // No video overlay
         await overlays.videoOverlayDoesntShow()
     })
-    test.only('Overlay alters to suit new video id after navigation', async ({ page }, workerInfo) => {
+    test('Overlay alters to suit new video id after navigation', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 
         // Given overlays feature is enabled
@@ -190,6 +190,7 @@ test.describe('Video Player overlays', () => {
 
         // and watch link is updated
         await overlays.hasWatchLinkFor({ videoID: 'abc1' })
+        await page.pause()
     })
     test('Small overlay is displayed on video', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
@@ -259,7 +260,7 @@ test.describe('Video Player overlays', () => {
         await overlays.watchInDuckPlayer()
         await overlays.userSettingWasUpdatedTo('enabled') // updated
     })
-    test('Selecting \'watch here\'', async ({ page }, workerInfo) => {
+    test.only('Selecting \'watch here\'', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 
         // Given overlays feature is enabled
@@ -270,6 +271,7 @@ test.describe('Video Player overlays', () => {
         await overlays.gotoPlayerPage()
 
         await overlays.watchHere()
+        await overlays.singleOverlayExists()
     })
     test('Selecting \'watch here\' + remember', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
