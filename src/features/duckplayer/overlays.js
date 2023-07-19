@@ -17,29 +17,11 @@ import { registerCustomElements } from './components/index.js'
  */
 
 /**
+ * @param {OverlaysFeatureSettings} settings - methods to read environment-sensitive things like the current URL etc
  * @param {import("./overlays.js").Environment} environment - methods to read environment-sensitive things like the current URL etc
  * @param {import("./overlay-messages.js").DuckPlayerOverlayMessages} messages - methods to communicate with a native backend
  */
-export async function initOverlays (environment, messages) {
-    /** @type {OverlaysFeatureSettings} */
-    const settings = {
-        selectors: {
-            thumbLink: "a[href^='/watch']:has(img)",
-            excludedRegions: [
-                '#playlist'
-            ]
-        },
-        thumbnailOverlays: {
-            state: 'enabled'
-        },
-        clickInterception: {
-            state: 'enabled'
-        },
-        videoOverlays: {
-            state: 'enabled'
-        }
-    }
-
+export async function initOverlays (settings, environment, messages) {
     // bind early to attach all listeners
     const domState = new DomState()
 

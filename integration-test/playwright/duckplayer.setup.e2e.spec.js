@@ -6,7 +6,7 @@ test.describe('e2e: Dismiss cookies', () => {
     test('storage locally', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 
-        await overlays.overlaysEnabled({ json: 'overlays-live' })
+        await overlays.withRemoteConfig({ json: 'overlays-live.json' })
         await overlays.gotoYoutubeHomepage()
         await overlays.dismissCookies()
 

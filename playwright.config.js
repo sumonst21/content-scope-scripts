@@ -14,7 +14,8 @@ export default defineConfig({
         {
             name: 'apple-isolated',
             testMatch: [
-                'integration-test/playwright/duckplayer.spec.js'
+                'integration-test/playwright/duckplayer.spec.js',
+                'integration-test/playwright/duckplayer-remote-config.spec.js'
             ],
             use: { injectName: 'apple-isolated', platform: 'macos' }
         },

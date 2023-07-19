@@ -15,7 +15,7 @@
               ]
             },
             "thumbnailOverlays": {
-              "state": "enabled"
+              "state": "disabled"
             },
             "clickInterception": {
               "state": "enabled"

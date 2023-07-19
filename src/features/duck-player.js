@@ -33,7 +33,7 @@
 import ContentFeature from '../content-feature.js'
 
 import { DuckPlayerOverlayMessages, OpenInDuckPlayerMsg, Pixel } from './duckplayer/overlay-messages.js'
-import { isBeingFramed } from '../utils.js'
+import dlv, { isBeingFramed } from '../utils.js'
 import { createMessaging } from '../create-messaging.js'
 import { Environment, initOverlays } from './duckplayer/overlays.js'
 
@@ -98,7 +98,8 @@ export default class DuckPlayerFeature extends ContentFeature {
         })
 
         if (overlaysEnabled) {
-            initOverlays(env, comms)
+            const settings = this.validateOverlaySettings(overlaySettings.youtube)
+            initOverlays(settings, env, comms)
         } else if (serpProxyEnabled) {
             comms.serpProxy()
         }
@@ -106,6 +107,32 @@ export default class DuckPlayerFeature extends ContentFeature {
 
     load (args) {
         super.load(args)
+    }
+
+    /**
+     * A single place to validate the overflow settings
+     * and set defaults if needed
+     * @param {any} input
+     * @returns {import("./duckplayer/overlays").OverlaysFeatureSettings}
+     */
+    validateOverlaySettings (input) {
+        return {
+            selectors: {
+                thumbLink: dlv(input, 'selectors.thumbLink', "a[href^='/watch']:has(img)" /* <-- default */),
+                excludedRegions: dlv(input, 'selectors.excludedRegions',
+                    ['#playlist'] /* <-- default */
+                )
+            },
+            thumbnailOverlays: {
+                state: dlv(input, 'thumbnailOverlays.state', 'enabled')
+            },
+            clickInterception: {
+                state: dlv(input, 'clickInterception.state', 'enabled')
+            },
+            videoOverlays: {
+                state: dlv(input, 'videoOverlays.state', 'enabled')
+            }
+        }
     }
 }
 

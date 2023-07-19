@@ -33,6 +33,15 @@ const userValues = {
     }
 }
 
+const configFiles = /** @type {const} */([
+    'overlays.json',
+    'overlays-live.json',
+    'disabled.json',
+    'thumbnail-overlays-disabled.json',
+    'click-interceptions-disabled.json',
+    'video-overlays-disabled.json'
+])
+
 export class DuckplayerOverlays {
     overlaysPage = '/duckplayer/pages/overlays.html'
     playerPage = '/duckplayer/pages/player.html'
@@ -185,16 +194,16 @@ export class DuckplayerOverlays {
 
     /**
      * @param {object} [params]
-     * @param {'overlays' | 'overlays-live'} [params.json="overlays"] - default is settings for localhost
+     * @param {configFiles[number]} [params.json="overlays"] - default is settings for localhost
      */
-    async overlaysEnabled (params = {}) {
-        const { json = 'overlays' } = params
+    async withRemoteConfig (params = {}) {
+        const { json = 'overlays.json' } = params
 
         await this.setup({ config: loadConfig(json) })
     }
 
     async serpProxyEnabled () {
-        const config = loadConfig('overlays')
+        const config = loadConfig('overlays.json')
         const domains = config.features.duckPlayer.settings.domains[0].patchSettings
         config.features.duckPlayer.settings.domains[0].patchSettings = domains.filter(x => x.path === '/overlays/serpProxy/state')
         await this.setup({ config })
@@ -234,14 +243,21 @@ export class DuckplayerOverlays {
 
     async overlaysDisabled () {
         // load original config
-        const config = loadConfig('overlays')
+        const config = loadConfig('overlays.json')
         // remove all domains from 'overlays', this disables the feature
         config.features.duckPlayer.settings.domains = []
         await this.setup({ config })
     }
 
     async hoverAThumbnail () {
-        await this.page.locator('.thumbnail[href="/watch?v=1"]').first().hover()
+        await this.page.locator('.thumbnail[href^="/watch"]').first().hover()
+    }
+
+    /**
+     * @param {string} regionSelector
+     */
+    async hoverAThumbnailInExcludedRegion (regionSelector) {
+        await this.page.locator(`${regionSelector} a[href^="/watch"]`).first().hover()
     }
 
     async hoverAYouTubeThumbnail () {
@@ -465,9 +481,9 @@ export class DuckplayerOverlays {
 }
 
 /**
- * @param {"overlays" | "overlays-live"} name
+ * @param {configFiles[number]} name
  * @return {Record<string, any>}
  */
 function loadConfig (name) {
-    return JSON.parse(readFileSync(`./integration-test/test-pages/duckplayer/config/${name}.json`, 'utf8'))
+    return JSON.parse(readFileSync(`./integration-test/test-pages/duckplayer/config/${name}`, 'utf8'))
 }

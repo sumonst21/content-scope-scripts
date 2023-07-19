@@ -61,7 +61,7 @@
 <div id="loaded"></div>
 
 <main></main>
-<template id="inner">
+<template id="inner-template">
     <div class="container">
         <div id="player">
             <div class="html5-video-player">
@@ -71,15 +71,29 @@
     </div>
 </template>
 
-<template id="related">
-    <div class="playlist"><h2>Up next</h2>
-        <div class="playlist-items">
+<template id="related-template">
+    <div class="related"><h2>Up next</h2>
+        <div class="related-items">
             <div class="thumbnails">
                 <a class="thumbnail" title="video 1" href="/watch?v=abc1"><img src="thumbnail-dark.jpg"></a>
                 <a class="thumbnail" title="video 2" href="/watch?v=abc2"><img src="thumbnail-dark.jpg"></a>
                 <a class="thumbnail" title="video 3" href="/watch?v=abc2"><img src="thumbnail-dark.jpg"></a>
                 <a class="thumbnail" title="video 4" href="/watch?v=abc3"><img src="thumbnail-dark.jpg"></a>
                 <a class="thumbnail" title="video 5" href="/watch?v=abc4"><img src="thumbnail-dark.jpg"></a>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="playlist-template">
+    <div class="playlist" id="playlist"><h2>Up next</h2>
+        <div class="playlist-items">
+            <div class="thumbnails">
+                <a class="thumbnail" title="video 1" href="/watch?v=xyz1"><img src="thumbnail-dark.jpg"></a>
+                <a class="thumbnail" title="video 2" href="/watch?v=xyz2"><img src="thumbnail-dark.jpg"></a>
+                <a class="thumbnail" title="video 3" href="/watch?v=xyz2"><img src="thumbnail-dark.jpg"></a>
+                <a class="thumbnail" title="video 4" href="/watch?v=xyz3"><img src="thumbnail-dark.jpg"></a>
+                <a class="thumbnail" title="video 5" href="/watch?v=xyz4"><img src="thumbnail-dark.jpg"></a>
             </div>
         </div>
     </div>
@@ -92,8 +106,9 @@
 
     const knownVariants = {
         "default": () => {
-            main.innerHTML += html('template[id="inner"]');
-            main.innerHTML += html('template[id="related"]')
+            main.innerHTML += html('template[id="inner-template"]');
+            main.innerHTML += html('template[id="related-template"]')
+            main.innerHTML += html('template[id="playlist-template"]')
         },
         "incremental-dom": () => {
             main.innerHTML += `<div class="container"><div id="player"></div></div>`
@@ -104,7 +119,8 @@
                     <video width="800px" height="600px"></video>
                 </div>
                 `
-                main.innerHTML += html('template[id="related"]')
+                main.innerHTML += html('template[id="related-template"]')
+                main.innerHTML += html('template[id="playlist-template"]')
             }, 200);
         },
     }

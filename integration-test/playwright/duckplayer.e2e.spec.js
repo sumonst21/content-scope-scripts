@@ -5,7 +5,7 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
     test('e2e: Overlays never appear on "shorts"', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 
-        await overlays.overlaysEnabled({ json: 'overlays-live' })
+        await overlays.withRemoteConfig({ json: 'overlays-live.json' })
         await overlays.gotoYoutubeHomepage()
 
         // Ensure the hover works normally to prevent false positives
@@ -19,7 +19,7 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
     test('e2e: Overlays never appear on "search pages"', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 
-        await overlays.overlaysEnabled({ json: 'overlays-live' })
+        await overlays.withRemoteConfig({ json: 'overlays-live.json' })
         await overlays.gotoYoutubeSearchPAge()
         await overlays.hoverAYouTubeThumbnail()
         await overlays.overlaysDontShow()
@@ -34,7 +34,7 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
     test.describe('when enabled', () => {
         test('shorts do not intercept clicks', async ({ page }, workerInfo) => {
             const overlays = DuckplayerOverlays.create(page, workerInfo)
-            await overlays.overlaysEnabled({ json: 'overlays-live' })
+            await overlays.withRemoteConfig({ json: 'overlays-live.json' })
             await overlays.userSettingIs('enabled')
             await overlays.gotoYoutubeHomepage()
             await page.waitForTimeout(2000)
@@ -43,7 +43,7 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
         })
         test('settings can change to disabled', async ({ page }, workerInfo) => {
             const overlays = DuckplayerOverlays.create(page, workerInfo)
-            await overlays.overlaysEnabled({ json: 'overlays-live' })
+            await overlays.withRemoteConfig({ json: 'overlays-live.json' })
             await overlays.userSettingIs('enabled')
             await overlays.gotoYoutubeHomepage()
 
@@ -62,7 +62,7 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
     test.describe('when disabled', () => {
         test('disabled', async ({ page }, workerInfo) => {
             const overlays = DuckplayerOverlays.create(page, workerInfo)
-            await overlays.overlaysEnabled({ json: 'overlays-live' })
+            await overlays.withRemoteConfig({ json: 'overlays-live.json' })
             await overlays.userSettingIs('disabled')
             await overlays.gotoYoutubeHomepage()
 
@@ -82,14 +82,14 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
     test.describe('e2e: video overlay', () => {
         test('setting: always ask', async ({ page }, workerInfo) => {
             const overlays = DuckplayerOverlays.create(page, workerInfo)
-            await overlays.overlaysEnabled({ json: 'overlays-live' })
+            await overlays.withRemoteConfig({ json: 'overlays-live.json' })
             await overlays.userSettingIs('always ask')
             await overlays.gotoYoutubeVideo()
             await overlays.overlayBlocksVideo()
         })
         test('setting: disabled', async ({ page }, workerInfo) => {
             const overlays = DuckplayerOverlays.create(page, workerInfo)
-            await overlays.overlaysEnabled({ json: 'overlays-live' })
+            await overlays.withRemoteConfig({ json: 'overlays-live.json' })
             await overlays.userSettingIs('always ask')
             await overlays.gotoYoutubeVideo()
             await overlays.overlayBlocksVideo()
