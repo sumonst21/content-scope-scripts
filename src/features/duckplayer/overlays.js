@@ -1,5 +1,5 @@
 import { DomState } from './util.js'
-import { Thumbnails } from './thumbnails.js'
+import { ClickInterception, Thumbnails } from './thumbnails.js'
 import { VideoOverlayManager } from './video-overlay-manager.js'
 import { registerCustomElements } from './components/index.js'
 
@@ -16,69 +16,11 @@ import { registerCustomElements } from './components/index.js'
  * @property {string} clickInterception.state
  */
 
-export class Environment {
-    allowedOverlayOrigins = ['www.youtube.com', 'duckduckgo.com']
-    allowedProxyOrigins = ['duckduckgo.com']
-
-    /**
-     * @param {object} params
-     * @param {boolean|null|undefined} [params.debug]
-     */
-    constructor (params) {
-        this.debug = Boolean(params.debug)
-    }
-
-    getPlayerPageHref () {
-        if (this.debug) {
-            const url = new URL(window.location.href)
-            if (url.hostname === 'www.youtube.com') return window.location.href
-            if (url.searchParams.has('v')) {
-                const base = new URL('/watch', 'https://youtube.com')
-                base.searchParams.set('v', url.searchParams.get('v') || '')
-                return base.toString()
-            }
-            return 'https://youtube.com/watch?v=123'
-        }
-        return window.location.href
-    }
-
-    getLargeThumbnailSrc (videoId) {
-        const url = new URL(`/vi/${videoId}/maxresdefault.jpg`, 'https://i.ytimg.com')
-        return url.href
-    }
-
-    setHref (href) {
-        window.location.href = href
-    }
-
-    hasOneTimeOverride () {
-        try {
-            // #ddg-play is a hard requirement, regardless of referrer
-            if (window.location.hash !== '#ddg-play') return false
-
-            // double-check that we have something that might be a parseable URL
-            if (typeof document.referrer !== 'string') return false
-            if (document.referrer.length === 0) return false // can be empty!
-
-            const { hostname } = new URL(document.referrer)
-            const isAllowed = this.allowedProxyOrigins.includes(hostname)
-            return isAllowed
-        } catch (e) {
-            console.error(e)
-        }
-        return false
-    }
-
-    isTestMode () {
-        return this.debug === true
-    }
-}
-
 /**
  * @param {import("./overlays.js").Environment} environment - methods to read environment-sensitive things like the current URL etc
  * @param {import("./overlay-messages.js").DuckPlayerOverlayMessages} messages - methods to communicate with a native backend
  */
-export async function initOverlaysV2 (environment, messages) {
+export async function initOverlays (environment, messages) {
     /** @type {OverlaysFeatureSettings} */
     const settings = {
         selectors: {
@@ -119,7 +61,7 @@ export async function initOverlaysV2 (environment, messages) {
      * Create the instance - this might fail if settings or user preferences prevent it
      * @type {Thumbnails|undefined}
      */
-    let thumbnails = thumbnailsFeatureFromSettings(userValues, settings, messages)
+    let thumbnails = thumbnailsFeatureFromSettings(userValues, settings, messages, environment)
     let videoOverlays = videoOverlaysFeatureFromSettings(userValues, settings, messages, environment)
 
     if (thumbnails || videoOverlays) {
@@ -150,7 +92,7 @@ export async function initOverlaysV2 (environment, messages) {
         videoOverlays?.destroy()
 
         // re-create thumbs
-        thumbnails = thumbnailsFeatureFromSettings(userValues, settings, messages)
+        thumbnails = thumbnailsFeatureFromSettings(userValues, settings, messages, environment)
         thumbnails?.init()
 
         // re-create video overlay
@@ -171,25 +113,29 @@ export async function initOverlaysV2 (environment, messages) {
  * @param {import("../duck-player.js").UserValues} userPreferences
  * @param {OverlaysFeatureSettings} settings
  * @param {import("../duck-player.js").DuckPlayerOverlayMessages} messages
- * @returns {Thumbnails | undefined}
+ * @param {Environment} environment
+ * @returns {Thumbnails | ClickInterception | undefined}
  */
-function thumbnailsFeatureFromSettings (userPreferences, settings, messages) {
+function thumbnailsFeatureFromSettings (userPreferences, settings, messages, environment) {
     const showThumbs = 'alwaysAsk' in userPreferences.privatePlayerMode && settings.thumbnailOverlays.state === 'enabled'
     const interceptClicks = 'enabled' in userPreferences.privatePlayerMode && settings.clickInterception.state === 'enabled'
 
-    let thumbnails
     if (showThumbs) {
-        thumbnails = new Thumbnails({
-            mode: { showOverlays: {} },
-            settings
-        }, messages)
-    } else if (interceptClicks) {
-        thumbnails = new Thumbnails({
-            mode: { interceptClicks: {} },
-            settings
-        }, messages)
+        return new Thumbnails({
+            environment,
+            settings,
+            messages
+        })
     }
-    return thumbnails
+    if (interceptClicks) {
+        return new ClickInterception({
+            environment,
+            settings,
+            messages
+        })
+    }
+
+    return undefined
 }
 
 /**
@@ -203,4 +149,69 @@ function videoOverlaysFeatureFromSettings (userValues, settings, messages, envir
     if (settings.videoOverlays.state !== 'enabled') return undefined
 
     return new VideoOverlayManager(userValues, environment, messages)
+}
+
+export class Environment {
+    allowedProxyOrigins = ['duckduckgo.com']
+
+    /**
+     * @param {object} params
+     * @param {boolean|null|undefined} [params.debug]
+     */
+    constructor (params) {
+        this.debug = Boolean(params.debug)
+    }
+
+    /**
+     * This is the URL of the page that the user is currently on
+     * It's abstracted so that we can mock it in tests
+     * @return {string}
+     */
+    getPlayerPageHref () {
+        if (this.debug) {
+            const url = new URL(window.location.href)
+            if (url.hostname === 'www.youtube.com') return window.location.href
+
+            // reflect certain query params, this is useful for testing
+            if (url.searchParams.has('v')) {
+                const base = new URL('/watch', 'https://youtube.com')
+                base.searchParams.set('v', url.searchParams.get('v') || '')
+                return base.toString()
+            }
+
+            return 'https://youtube.com/watch?v=123'
+        }
+        return window.location.href
+    }
+
+    getLargeThumbnailSrc (videoId) {
+        const url = new URL(`/vi/${videoId}/maxresdefault.jpg`, 'https://i.ytimg.com')
+        return url.href
+    }
+
+    setHref (href) {
+        window.location.href = href
+    }
+
+    hasOneTimeOverride () {
+        try {
+            // #ddg-play is a hard requirement, regardless of referrer
+            if (window.location.hash !== '#ddg-play') return false
+
+            // double-check that we have something that might be a parseable URL
+            if (typeof document.referrer !== 'string') return false
+            if (document.referrer.length === 0) return false // can be empty!
+
+            const { hostname } = new URL(document.referrer)
+            const isAllowed = this.allowedProxyOrigins.includes(hostname)
+            return isAllowed
+        } catch (e) {
+            console.error(e)
+        }
+        return false
+    }
+
+    isTestMode () {
+        return this.debug === true
+    }
 }

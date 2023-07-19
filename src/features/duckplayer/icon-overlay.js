@@ -21,9 +21,11 @@ export class IconOverlay {
     /**
      * @param {object} params
      * @param {(href: string) => void} params.onClick
+     * @param {import("./overlays.js").Environment} params.environment
      */
     constructor (params) {
         this.onClick = params.onClick
+        this.environment = params.environment
     }
 
     /**

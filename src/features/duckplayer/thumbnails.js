@@ -6,7 +6,8 @@ import { OpenInDuckPlayerMsg } from './overlay-messages.js'
 /**
  * @typedef ThumbnailSettings
  * @property {import("./overlays.js").OverlaysFeatureSettings} settings
- * @property {{interceptClicks: {}} | {showOverlays: {}}} mode
+ * @property {import("./overlays.js").Environment} environment
+ * @property {import("../duck-player.js").DuckPlayerOverlayMessages} messages
  */
 
 /**
@@ -16,67 +17,26 @@ import { OpenInDuckPlayerMsg } from './overlay-messages.js'
 export class Thumbnails {
     /**
      * @param {ThumbnailSettings} params
-     * @param {import("../duck-player.js").DuckPlayerOverlayMessages} messages
      */
-    constructor (params, messages) {
+    constructor (params) {
         this.settings = params.settings
-        this.mode = params.mode
-        this.comms = messages
+        this.messages = params.messages
+        this.environment = params.environment
     }
 
     /**
      * Perform side effects
      */
     init () {
-        if ('interceptClicks' in this.mode) {
-            this.interceptClicks()
-        } else if ('showOverlays' in this.mode) {
-            this.showOverlays()
-        }
-    }
-
-    /**
-     * To intercept a 'click' means to evaluate all DOM nodes
-     * beneath the click and match it against our selector
-     */
-    interceptClicks () {
-        this.sideEffect('intercepting clicks', () => {
-            const { selectors } = this.settings
-            const parentNode = document.documentElement || document.body
-
-            const clickHandler = (e) => {
-                const element = findElementFromEvent(selectors.thumbLink, e)
-                if (element && 'href' in element) {
-                    const asLink = VideoParams.fromHref(element.href)?.toPrivatePlayerUrl()
-                    if (asLink) {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        console.log('click: (prevented default) ', asLink, element)
-                    }
-                }
-            }
-
-            parentNode.addEventListener('click', clickHandler, true)
-
-            return () => {
-                parentNode.removeEventListener('click', clickHandler, true)
-            }
-        })
-    }
-
-    /**
-     * Showing overlays is about placing a small Dax icon on top of
-     * thumbnails where we can offer a 'watch in duck player' alternative
-     */
-    showOverlays () {
         this.sideEffect('showing overlays on hover', () => {
             const { selectors } = this.settings
             const parentNode = document.documentElement || document.body
 
             // create the icon state
             const icon = new IconOverlay({
+                environment: this.environment,
                 onClick: (href) => {
-                    this.comms.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
+                    this.messages.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
                 }
             })
 
@@ -142,6 +102,63 @@ export class Thumbnails {
         execCleanups(this._cleanups)
         this._cleanups = []
     }
+
+    /**
+     * Wrap a side-effecting operation for easier debugging
+     * and teardown/release of resources
+     * @param {string} name
+     * @param {() => () => void} fn
+     */
+    sideEffect (name, fn) {
+        applyEffect(name, fn, this._cleanups)
+    }
+}
+
+export class ClickInterception {
+    /**
+     * @param {ThumbnailSettings} params
+     */
+    constructor (params) {
+        this.settings = params.settings
+        this.messages = params.messages
+        this.environment = params.environment
+    }
+
+    /**
+     * Perform side effects
+     */
+    init () {
+        this.sideEffect('intercepting clicks', () => {
+            const { selectors } = this.settings
+            const parentNode = document.documentElement || document.body
+
+            const clickHandler = (e) => {
+                const element = findElementFromEvent(selectors.thumbLink, e)
+                if (element && 'href' in element) {
+                    const asLink = VideoParams.fromHref(element.href)?.toPrivatePlayerUrl()
+                    if (asLink) {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        console.log('click: (prevented default) ', asLink, element)
+                    }
+                }
+            }
+
+            parentNode.addEventListener('click', clickHandler, true)
+
+            return () => {
+                parentNode.removeEventListener('click', clickHandler, true)
+            }
+        })
+    }
+
+    destroy () {
+        execCleanups(this._cleanups)
+        this._cleanups = []
+    }
+
+    /** @type {{fn: () => void, name: string}[]} */
+    _cleanups = []
 
     /**
      * Wrap a side-effecting operation for easier debugging

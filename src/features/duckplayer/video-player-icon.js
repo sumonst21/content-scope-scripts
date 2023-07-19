@@ -4,10 +4,13 @@ import { OpenInDuckPlayerMsg } from './overlay-messages.js'
 
 export class VideoPlayerIcon {
     /**
-     * @param {import("./overlay-messages.js").DuckPlayerOverlayMessages} messages
+     * @param {object} params
+     * @param {import("./overlay-messages.js").DuckPlayerOverlayMessages} params.messages
+     * @param {import("./overlays.js").Environment} params.environment
      */
-    constructor (messages) {
-        this.messages = messages
+    constructor (params) {
+        this.messages = params.messages
+        this.environment = params.environment
     }
 
     /**
@@ -36,6 +39,7 @@ export class VideoPlayerIcon {
             const href = params.toPrivatePlayerUrl()
 
             const icon = new IconOverlay({
+                environment: this.environment,
                 onClick: (href) => {
                     this.messages.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
                 }

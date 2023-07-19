@@ -105,7 +105,10 @@ export class VideoOverlayManager {
         }
         if (!this.videoPlayerIcon) {
             // append to the document
-            this.videoPlayerIcon = new VideoPlayerIcon(this.messages)
+            this.videoPlayerIcon = new VideoPlayerIcon({
+                messages: this.messages,
+                environment: this.environment
+            })
         }
         this.videoPlayerIcon.init(containerElement, params)
     }
