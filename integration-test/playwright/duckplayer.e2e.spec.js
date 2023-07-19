@@ -3,9 +3,6 @@ import { DuckplayerOverlays } from './page-objects/duckplayer-overlays.js'
 
 test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
     test('e2e: Overlays never appear on "shorts"', async ({ page }, workerInfo) => {
-        // @ts-expect-error - TS doesn't know about the "use.e2e" property
-        workerInfo.skip(!workerInfo.project.use?.e2e)
-
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 
         await overlays.overlaysEnabled({ json: 'overlays-live' })
@@ -20,9 +17,6 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
         await overlays.overlaysDontShow()
     })
     test('e2e: Overlays never appear on "search pages"', async ({ page }, workerInfo) => {
-        // @ts-expect-error - TS doesn't know about the "use.e2e" property
-        workerInfo.skip(!workerInfo.project.use?.e2e)
-
         const overlays = DuckplayerOverlays.create(page, workerInfo)
 
         await overlays.overlaysEnabled({ json: 'overlays-live' })
@@ -31,8 +25,6 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
         await overlays.overlaysDontShow()
     })
     test('control (without our script): clicking on a short loads correctly', async ({ page }, workerInfo) => {
-        // @ts-expect-error - TS doesn't know about the "use.e2e" property
-        workerInfo.skip(!workerInfo.project.use?.e2e)
         const overlays = DuckplayerOverlays.create(page, workerInfo)
         await overlays.gotoYoutubeHomepage()
         await page.waitForTimeout(2000)
@@ -41,8 +33,6 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
     })
     test.describe('when enabled', () => {
         test('shorts do not intercept clicks', async ({ page }, workerInfo) => {
-            // @ts-expect-error - TS doesn't know about the "use.e2e" property
-            workerInfo.skip(!workerInfo.project.use?.e2e)
             const overlays = DuckplayerOverlays.create(page, workerInfo)
             await overlays.overlaysEnabled({ json: 'overlays-live' })
             await overlays.userSettingIs('enabled')
@@ -52,8 +42,6 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
             await overlays.showsShortsPage()
         })
         test('settings can change to disabled', async ({ page }, workerInfo) => {
-            // @ts-expect-error - TS doesn't know about the "use.e2e" property
-            workerInfo.skip(!workerInfo.project.use?.e2e)
             const overlays = DuckplayerOverlays.create(page, workerInfo)
             await overlays.overlaysEnabled({ json: 'overlays-live' })
             await overlays.userSettingIs('enabled')
@@ -73,8 +61,6 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
     })
     test.describe('when disabled', () => {
         test('disabled', async ({ page }, workerInfo) => {
-            // @ts-expect-error - TS doesn't know about the "use.e2e" property
-            workerInfo.skip(!workerInfo.project.use?.e2e)
             const overlays = DuckplayerOverlays.create(page, workerInfo)
             await overlays.overlaysEnabled({ json: 'overlays-live' })
             await overlays.userSettingIs('disabled')
@@ -95,8 +81,6 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
     })
     test.describe('e2e: video overlay', () => {
         test('setting: always ask', async ({ page }, workerInfo) => {
-            // @ts-expect-error - TS doesn't know about the "use.e2e" property
-            workerInfo.skip(!workerInfo.project.use?.e2e)
             const overlays = DuckplayerOverlays.create(page, workerInfo)
             await overlays.overlaysEnabled({ json: 'overlays-live' })
             await overlays.userSettingIs('always ask')
@@ -104,8 +88,6 @@ test.describe('e2e: Duck Player Thumbnail Overlays on YouTube.com', () => {
             await overlays.overlayBlocksVideo()
         })
         test('setting: disabled', async ({ page }, workerInfo) => {
-            // @ts-expect-error - TS doesn't know about the "use.e2e" property
-            workerInfo.skip(!workerInfo.project.use?.e2e)
             const overlays = DuckplayerOverlays.create(page, workerInfo)
             await overlays.overlaysEnabled({ json: 'overlays-live' })
             await overlays.userSettingIs('always ask')

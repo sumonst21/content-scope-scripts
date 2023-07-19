@@ -1,27 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
-import { dirname, join } from 'node:path'
-const __dirname = dirname(new URL(import.meta.url).pathname)
-
-export const STORAGE_STATE = join(__dirname, 'integration-test/state/yt.json')
 
 export default defineConfig({
     projects: [
-        {
-            name: 'duckplayer-e2e-setup',
-            testMatch: ['integration-test/playwright/duckplayer.setup.e2e.spec.js'],
-            use: { injectName: 'windows', platform: 'windows', e2e: process.env.E2E }
-        },
-        {
-            name: 'duckplayer-e2e',
-            testMatch: ['integration-test/playwright/duckplayer.e2e.spec.js'],
-            use: {
-                injectName: 'apple-isolated',
-                platform: 'macos',
-                e2e: process.env.E2E,
-                storageState: STORAGE_STATE
-            },
-            dependencies: ['duckplayer-e2e-setup']
-        },
         {
             name: 'windows',
             testMatch: [
