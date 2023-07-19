@@ -33,6 +33,7 @@ const userValues = {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const configFiles = /** @type {const} */([
     'overlays.json',
     'overlays-live.json',
