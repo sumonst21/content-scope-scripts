@@ -4,8 +4,8 @@ import { IconOverlay } from './icon-overlay.js'
 import { OpenInDuckPlayerMsg } from './overlay-messages.js'
 
 /**
- * @typedef ThumbnailSettings
- * @property {import("./overlays.js").OverlaysFeatureSettings} settings
+ * @typedef ThumbnailParams
+ * @property {import("../duck-player.js").OverlaysFeatureSettings} settings
  * @property {import("./overlays.js").Environment} environment
  * @property {import("../duck-player.js").DuckPlayerOverlayMessages} messages
  */
@@ -16,7 +16,7 @@ import { OpenInDuckPlayerMsg } from './overlay-messages.js'
  */
 export class Thumbnails {
     /**
-     * @param {ThumbnailSettings} params
+     * @param {ThumbnailParams} params
      */
     constructor (params) {
         this.settings = params.settings
@@ -116,7 +116,7 @@ export class Thumbnails {
 
 export class ClickInterception {
     /**
-     * @param {ThumbnailSettings} params
+     * @param {ThumbnailParams} params
      */
     constructor (params) {
         this.settings = params.settings

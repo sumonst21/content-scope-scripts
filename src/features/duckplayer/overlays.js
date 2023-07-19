@@ -4,20 +4,7 @@ import { VideoOverlayManager } from './video-overlay-manager.js'
 import { registerCustomElements } from './components/index.js'
 
 /**
- * @typedef OverlaysFeatureSettings - a representation of what is expected from remote configuration
- * @property {object} selectors
- * @property {string} selectors.thumbLink - the CSS selector used to find links
- * @property {string[]} selectors.excludedRegions - CSS selectors of regions to exclude
- * @property {object} thumbnailOverlays
- * @property {string} thumbnailOverlays.state
- * @property {object} videoOverlays
- * @property {string} videoOverlays.state
- * @property {object} clickInterception
- * @property {string} clickInterception.state
- */
-
-/**
- * @param {OverlaysFeatureSettings} settings - methods to read environment-sensitive things like the current URL etc
+ * @param {import("../duck-player.js").OverlaysFeatureSettings} settings - methods to read environment-sensitive things like the current URL etc
  * @param {import("./overlays.js").Environment} environment - methods to read environment-sensitive things like the current URL etc
  * @param {import("./overlay-messages.js").DuckPlayerOverlayMessages} messages - methods to communicate with a native backend
  */
@@ -93,7 +80,7 @@ export async function initOverlays (settings, environment, messages) {
 
 /**
  * @param {import("../duck-player.js").UserValues} userPreferences
- * @param {OverlaysFeatureSettings} settings
+ * @param {import("../duck-player.js").OverlaysFeatureSettings} settings
  * @param {import("../duck-player.js").DuckPlayerOverlayMessages} messages
  * @param {Environment} environment
  * @returns {Thumbnails | ClickInterception | undefined}
@@ -122,7 +109,7 @@ function thumbnailsFeatureFromSettings (userPreferences, settings, messages, env
 
 /**
  * @param {import("../duck-player.js").UserValues} userValues
- * @param {OverlaysFeatureSettings} settings
+ * @param {import("../duck-player.js").OverlaysFeatureSettings} settings
  * @param {import("../duck-player.js").DuckPlayerOverlayMessages} messages
  * @param {import("./overlays.js").Environment} environment
  * @returns {VideoOverlayManager | undefined}

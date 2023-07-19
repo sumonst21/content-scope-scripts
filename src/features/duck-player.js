@@ -22,6 +22,9 @@
  * Please see {@link DuckPlayerOverlayMessages} for the up-to-date list
  *
  * ## Remote Config
+ *
+ *   - Please see {@link OverlaysFeatureSettings} for docs on the individual fields
+ *
  * All features are **off** by default. Remote config is then used to selectively enable features.
  *
  * For example, to enable the Duck Player Overlay on YouTube, the following config is used:
@@ -113,7 +116,7 @@ export default class DuckPlayerFeature extends ContentFeature {
      * A single place to validate the overflow settings
      * and set defaults if needed
      * @param {any} input
-     * @returns {import("./duckplayer/overlays").OverlaysFeatureSettings}
+     * @returns {OverlaysFeatureSettings}
      */
     validateOverlaySettings (input) {
         return {
@@ -135,6 +138,28 @@ export default class DuckPlayerFeature extends ContentFeature {
         }
     }
 }
+
+/**
+ * @typedef OverlaysFeatureSettings
+ * This configuration is used within YouTube.com
+ *
+ * - See {@link "Duck Player Overlays"} for a full JSON example
+ *
+ * @property {object} selectors
+ * In the config, this is under `/features/duckPlayer/settings/overlays/youtube/selectors`
+ * @property {string} selectors.thumbLink - the CSS selector used to find links
+ * @property {string[]} selectors.excludedRegions - CSS selectors of regions to exclude
+ * @property {object} thumbnailOverlays
+ * In the config, this is under `/features/duckPlayer/settings/overlays/youtube/thumbnailOverlays`
+ * @property {'enabled' | 'disabled'} thumbnailOverlays.state
+ * @property {object} videoOverlays
+ * In the config, this is under `/features/duckPlayer/settings/overlays/youtube/videoOverlays`
+ * @property {'enabled' | 'disabled'} videoOverlays.state
+ * @property {object} clickInterception
+ * In the config, this is under `/features/duckPlayer/settings/overlays/youtube/clickInterception`
+ *
+ * @property {'enabled' | 'disabled'} clickInterception.state
+ */
 
 // for docs generation
 export { DuckPlayerOverlayMessages, OpenInDuckPlayerMsg, Pixel }
