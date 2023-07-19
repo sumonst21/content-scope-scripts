@@ -20,7 +20,7 @@ export default defineConfig({
                 storageState: STORAGE_STATE
             },
             dependencies: ['duckplayer-e2e-setup']
-        },
+        }
     ],
     timeout: 30 * 1000,
     expect: {
