@@ -54,16 +54,38 @@ export class DuckplayerOverlays {
         await this.page.goto(this.overlaysPage)
     }
 
-    async gotoYoutubeHomepage () {
-        await this.page.goto('https://www.youtube.com')
+    async dismissCookies () {
         // cookie banner
         await this.page.getByRole('button', { name: 'Reject the use of cookies and other data for the purposes described' }).click()
     }
 
+    async gotoYoutubeHomepage () {
+        await this.page.goto('https://www.youtube.com')
+        // await this.dismissCookies()
+    }
+
+    async gotoYoutubeVideo () {
+        await this.page.goto('https://www.youtube.com/watch?v=nfWlot6h_JM')
+        // await this.dismissCookies()
+    }
+
     async gotoYoutubeSearchPAge () {
         await this.page.goto('https://www.youtube.com/results?search_query=taylor+swift')
-        // cookie banner
-        await this.page.getByRole('button', { name: 'Reject the use of cookies and other data for the purposes described' }).click()
+        // await this.dismissCookies()
+    }
+
+    /**
+     * @return {Promise<string>}
+     */
+    async clicksFirstThumbnail () {
+        const elem = await this.page.locator('a[href^="/watch?v"]:has(img)').first()
+        const link = await elem.getAttribute('href')
+        if (!link) throw new Error('link must exist')
+        await elem.click({ force: true })
+        const url = new URL(link, 'https://youtube.com')
+        const v = url.searchParams.get('v')
+        if (!v) throw new Error('v param must exist')
+        return v
     }
 
     async clicksFirstShortsThumbnail () {
@@ -72,6 +94,17 @@ export class DuckplayerOverlays {
 
     async showsShortsPage () {
         await this.page.waitForURL(/^https:\/\/www.youtube.com\/shorts/, { timeout: 5000 })
+    }
+
+    /**
+     */
+    async showsVideoPageFor (videoID) {
+        await this.page.waitForURL((url) => {
+            if (url.pathname === '/watch') {
+                if (url.searchParams.get('v') === videoID) return true
+            }
+            return false
+        }, { timeout: 1000 })
     }
 
     /**
@@ -279,9 +312,10 @@ export class DuckplayerOverlays {
      * To say 'our player loads' means to verify that the correct message is communicated
      * to native platforms
      *
+     * @param {string} id
      * @return {Promise<void>}
      */
-    async playerLoadsForCorrectVideo () {
+    async duckPlayerLoadsFor (id) {
         const messages = await this.waitForMessage('openDuckPlayer')
         expect(messages).toMatchObject([
             {
@@ -289,7 +323,7 @@ export class DuckplayerOverlays {
                     context: this.messagingContext,
                     featureName: 'duckPlayer',
                     params: {
-                        href: 'duck://player/1'
+                        href: 'duck://player/' + id
                     },
                     method: 'openDuckPlayer'
                 }

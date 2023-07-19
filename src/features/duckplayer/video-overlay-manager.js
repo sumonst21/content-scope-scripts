@@ -2,8 +2,7 @@
 import { applyEffect, execCleanups, VideoParams } from './util.js'
 import { VideoPlayerIcon } from './video-player-icon'
 import { DDGVideoOverlay } from './components/ddg-video-overlay.js'
-import { OpenInDuckPlayerMsg, Pixel } from './overlay-messages.js'
-import { IconOverlay } from './icon-overlay.js'
+import { Pixel } from './overlay-messages.js'
 
 /**
  * Handle the switch between small & large overlays

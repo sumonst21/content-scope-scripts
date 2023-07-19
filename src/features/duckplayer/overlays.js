@@ -7,7 +7,7 @@ import { registerCustomElements } from './components/index.js'
  * @typedef OverlaysFeatureSettings - a representation of what is expected from remote configuration
  * @property {object} selectors
  * @property {string} selectors.thumbLink - the CSS selector used to find links
- * @property {string[]} selectors.excludedParents - CSS selectors of regions to exclude
+ * @property {string[]} selectors.excludedRegions - CSS selectors of regions to exclude
  * @property {object} thumbnailOverlays
  * @property {string} thumbnailOverlays.state
  * @property {object} videoOverlays
@@ -25,7 +25,7 @@ export async function initOverlays (environment, messages) {
     const settings = {
         selectors: {
             thumbLink: "a[href^='/watch']:has(img)",
-            excludedParents: [
+            excludedRegions: [
                 '#playlist'
             ]
         },

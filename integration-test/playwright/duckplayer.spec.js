@@ -62,7 +62,7 @@ test.describe('Thumbnail Overlays', () => {
         await overlays.clickDDGOverlay()
 
         // Then our player loads for the correct video
-        await overlays.playerLoadsForCorrectVideo()
+        await overlays.duckPlayerLoadsFor('1')
     })
     test('Overlays dont show when user setting is "enabled"', async ({ page }, workerInfo) => {
         const overlays = DuckplayerOverlays.create(page, workerInfo)

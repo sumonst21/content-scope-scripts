@@ -62,12 +62,12 @@ export class Thumbnails {
                 }
 
                 // ensure it doesn't contain sub-links
-                if (hoverElement.querySelector(selectors.thumbLink)) {
+                if (hoverElement.querySelector('a[href]')) {
                     return
                 }
 
                 // ignore if it exists within an excluded parent
-                const existsInExcludedParent = selectors.excludedParents.some(selector => {
+                const existsInExcludedParent = selectors.excludedRegions.some(selector => {
                     for (const parent of document.querySelectorAll(selector)) {
                         if (parent.contains(hoverElement)) return true
                     }
@@ -135,11 +135,11 @@ export class ClickInterception {
             const clickHandler = (e) => {
                 const element = findElementFromEvent(selectors.thumbLink, e)
                 if (element && 'href' in element) {
-                    const asLink = VideoParams.fromHref(element.href)?.toPrivatePlayerUrl()
-                    if (asLink) {
+                    const duckPlayerLink = VideoParams.fromHref(element.href)?.toPrivatePlayerUrl()
+                    if (duckPlayerLink) {
                         e.preventDefault()
                         e.stopPropagation()
-                        console.log('click: (prevented default) ', asLink, element)
+                        this.messages.openDuckPlayer({ href: duckPlayerLink })
                     }
                 }
             }
