@@ -15,8 +15,8 @@ export default defineConfig({
             name: 'duckplayer-e2e',
             testMatch: ['integration-test/playwright/duckplayer.e2e.spec.js'],
             use: {
-                injectName: 'windows',
-                platform: 'windows',
+                injectName: 'apple-isolated',
+                platform: 'macos',
                 e2e: process.env.E2E,
                 storageState: STORAGE_STATE
             },
