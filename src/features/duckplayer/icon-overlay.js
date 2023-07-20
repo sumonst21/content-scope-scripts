@@ -1,9 +1,14 @@
-import { addTrustedEventListener, appendElement, VideoParams } from './util'
+import css from './assets/styles.css'
+import { SideEffects, VideoParams } from './util'
 import dax from './assets/dax.svg'
 import { i18n } from './text.js'
 import { html, trustedUnsafe } from '../../dom-utils.js'
 
 export class IconOverlay {
+    sideEffects = new SideEffects()
+
+    /** @type {HTMLElement | null} */
+    element = null
     /**
      * Special class used for the overlay hover. For hovering, we use a
      * single element and move it around to the hovered video element.
@@ -17,16 +22,6 @@ export class IconOverlay {
     /** @type {HTMLElement | null} */
     currentVideoElement = null
     hoverOverlayVisible = false
-
-    /**
-     * @param {object} params
-     * @param {(href: string) => void} params.onClick
-     * @param {import("./overlays.js").Environment} params.environment
-     */
-    constructor (params) {
-        this.onClick = params.onClick
-        this.environment = params.environment
-    }
 
     /**
      * Creates an Icon Overlay.
@@ -54,17 +49,6 @@ export class IconOverlay {
                 </a>`.toString()
 
         overlayElement.querySelector('a.ddg-play-privately')?.setAttribute('href', href)
-        overlayElement.querySelector('a.ddg-play-privately')?.addEventListener('click', (event) => {
-            event.preventDefault()
-            event.stopPropagation()
-
-            // @ts-expect-error - needs a cast
-            const link = event.target.closest('a')
-            const href = link.getAttribute('href')
-
-            this.onClick(href)
-        })
-
         return overlayElement
     }
 
@@ -181,14 +165,46 @@ export class IconOverlay {
      * More performant / clean than adding an overlay to each and every video thumbnail. Also it prevents triggering
      * the video hover preview on the homepage if the user hovers the overlay, because user is no longer hovering
      * inside a video thumbnail when hovering the overlay. Nice.
+     * @param {(href: string) => void} onClick
      */
-    appendHoverOverlay () {
-        const el = this.create('fixed', '', this.HOVER_CLASS)
-        appendElement(document.body, el)
+    appendHoverOverlay (onClick) {
+        this.sideEffects.add('IconOverlay adding to page', () => {
+            // add the CSS to the head
+            const style = document.createElement('style')
+            style.textContent = css
+            document.head.appendChild(style)
 
-        // Hide it if user clicks anywhere on the page but in the icon overlay itself
-        addTrustedEventListener(document.body, 'mouseup', (event) => {
-            this.hideHoverOverlay(event)
+            // create and append the element
+            const element = this.create('fixed', '', this.HOVER_CLASS)
+            document.body.appendChild(element)
+
+            //
+            this.addClickHandler(element, onClick)
+
+            return () => {
+                element.remove()
+                document.head.removeChild(style)
+            }
+        })
+    }
+
+    /**
+     * @param {HTMLElement} container
+     * @param {string} href
+     * @param {(href: string) => void} onClick
+     */
+    appendSmallVideoOverlay (container, href, onClick) {
+        this.sideEffects.add('IconOverlay adding to page', () => {
+            const element = this.create('video-player', href, 'hidden')
+            //
+            this.addClickHandler(element, onClick)
+
+            container.appendChild(element)
+            element.classList.remove('hidden')
+
+            return () => {
+                element?.remove()
+            }
         })
     }
 
@@ -214,9 +230,26 @@ export class IconOverlay {
         return getSizeType(imagesByArea[largestImage].offsetWidth, imagesByArea[largestImage].offsetHeight)
     }
 
-    removeAll () {
-        document.querySelectorAll('.' + this.OVERLAY_CLASS).forEach(element => {
-            element.remove()
+    /**
+     * Handle when dax is clicked - prevent propagation
+     * so no further listeners see this
+     *
+     * @param {HTMLElement} element - the wrapping div
+     * @param {(href: string) => void} callback - the function to execute following a click
+     */
+    addClickHandler (element, callback) {
+        element.addEventListener('click', (event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            const link = /** @type {HTMLElement} */(event.target).closest('a')
+            const href = link?.getAttribute('href')
+            if (href) {
+                callback(href)
+            }
         })
+    }
+
+    destroy () {
+        this.sideEffects.destroy()
     }
 }

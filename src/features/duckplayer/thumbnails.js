@@ -1,5 +1,4 @@
-import css from './assets/styles.css'
-import { applyEffect, execCleanups, VideoParams } from './util.js'
+import { SideEffects, VideoParams } from './util.js'
 import { IconOverlay } from './icon-overlay.js'
 import { OpenInDuckPlayerMsg } from './overlay-messages.js'
 
@@ -15,6 +14,7 @@ import { OpenInDuckPlayerMsg } from './overlay-messages.js'
  * + click interceptions
  */
 export class Thumbnails {
+    sideEffects = new SideEffects()
     /**
      * @param {ThumbnailParams} params
      */
@@ -28,31 +28,37 @@ export class Thumbnails {
      * Perform side effects
      */
     init () {
-        this.sideEffect('showing overlays on hover', () => {
+        this.sideEffects.add('showing overlays on hover', () => {
             const { selectors } = this.settings
             const parentNode = document.documentElement || document.body
 
-            // create the icon state
-            const icon = new IconOverlay({
-                environment: this.environment,
-                onClick: (href) => {
-                    this.messages.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
-                }
+            // create the icon & append it to the page
+            const icon = new IconOverlay()
+            icon.appendHoverOverlay((href) => {
+                this.messages.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
             })
 
-            // append to the document
-            icon.appendHoverOverlay()
+            // detect all click, if it's anywhere on the page
+            // but in the icon overlay itself, then just hide the overlay
+            const clickHandler = (e) => {
+                const overlay = icon.getHoverOverlay()
+                if (overlay?.contains(e.target)) {
+                    // do nothing here, the click will have been handled by the overlay
+                } else if (overlay) {
+                    icon.hideOverlay(overlay)
+                    icon.hoverOverlayVisible = false
+                }
+            }
 
-            // add the CSS to the head
-            const style = document.createElement('style')
-            style.textContent = css
-            document.head.appendChild(style)
+            parentNode.addEventListener('click', clickHandler, true)
 
+            // detect hovers and decide to show hover icon, or not
             const mouseOverHandler = (e) => {
                 const hoverElement = findElementFromEvent(selectors.thumbLink, e)
+                const validLink = isValidLink(hoverElement, this.settings)
 
-                // if it's not an element we care about
-                if (!hoverElement || !('href' in hoverElement)) {
+                // if it's not an element we care about, bail early and remove the overlay
+                if (!hoverElement || !validLink) {
                     const overlay = icon.getHoverOverlay()
                     if (overlay) {
                         icon.hideOverlay(overlay)
@@ -61,26 +67,13 @@ export class Thumbnails {
                     return
                 }
 
-                // ensure it doesn't contain sub-links
+                // also ensure it doesn't contain sub-links
                 if (hoverElement.querySelector('a[href]')) {
                     return
                 }
 
-                // ignore if it exists within an excluded parent
-                const existsInExcludedParent = selectors.excludedRegions.some(selector => {
-                    for (const parent of document.querySelectorAll(selector)) {
-                        if (parent.contains(hoverElement)) return true
-                    }
-                    return false
-                })
-
-                if (existsInExcludedParent) return
-
-                // now try to convert to a valid duck player link
-                const asLink = VideoParams.fromHref(hoverElement.href)?.toPrivatePlayerUrl()
-
                 // if we get here, we're confident that we can link to this video + it's a valid element to append to
-                if (asLink) {
+                if (validLink) {
                     icon.moveHoverOverlayToVideoElement(hoverElement)
                 }
             }
@@ -89,32 +82,19 @@ export class Thumbnails {
 
             return () => {
                 parentNode.removeEventListener('mouseover', mouseOverHandler, true)
-                icon.removeAll()
-                document.head.removeChild(style)
+                parentNode.removeEventListener('click', clickHandler, true)
+                icon.destroy()
             }
         })
     }
 
-    /** @type {{fn: () => void, name: string}[]} */
-    _cleanups = []
-
     destroy () {
-        execCleanups(this._cleanups)
-        this._cleanups = []
-    }
-
-    /**
-     * Wrap a side-effecting operation for easier debugging
-     * and teardown/release of resources
-     * @param {string} name
-     * @param {() => () => void} fn
-     */
-    sideEffect (name, fn) {
-        applyEffect(name, fn, this._cleanups)
+        this.sideEffects.destroy()
     }
 }
 
 export class ClickInterception {
+    sideEffects = new SideEffects()
     /**
      * @param {ThumbnailParams} params
      */
@@ -128,19 +108,18 @@ export class ClickInterception {
      * Perform side effects
      */
     init () {
-        this.sideEffect('intercepting clicks', () => {
+        this.sideEffects.add('intercepting clicks', () => {
             const { selectors } = this.settings
             const parentNode = document.documentElement || document.body
 
             const clickHandler = (e) => {
-                const element = findElementFromEvent(selectors.thumbLink, e)
-                if (element && 'href' in element) {
-                    const duckPlayerLink = VideoParams.fromHref(element.href)?.toPrivatePlayerUrl()
-                    if (duckPlayerLink) {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        this.messages.openDuckPlayer({ href: duckPlayerLink })
-                    }
+                const clickedElement = findElementFromEvent(selectors.thumbLink, e)
+                const validLink = isValidLink(clickedElement, this.settings)
+
+                if (validLink) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    this.messages.openDuckPlayer({ href: validLink })
                 }
             }
 
@@ -153,21 +132,7 @@ export class ClickInterception {
     }
 
     destroy () {
-        execCleanups(this._cleanups)
-        this._cleanups = []
-    }
-
-    /** @type {{fn: () => void, name: string}[]} */
-    _cleanups = []
-
-    /**
-     * Wrap a side-effecting operation for easier debugging
-     * and teardown/release of resources
-     * @param {string} name
-     * @param {() => () => void} fn
-     */
-    sideEffect (name, fn) {
-        applyEffect(name, fn, this._cleanups)
+        this.sideEffects.destroy()
     }
 }
 
@@ -181,4 +146,41 @@ function findElementFromEvent (selector, e) {
         if (element.matches(selector)) return /** @type {HTMLElement} */(element)
     }
     return null
+}
+
+/**
+ * @param {HTMLElement|null} element
+ * @param settings
+ * @return {string | null | undefined}
+ */
+function isValidLink (element, settings) {
+    if (!element) return null
+
+    /**
+     * Does this element exist inside an excluded region?
+     */
+    const existsInExcludedParent = settings.selectors.excludedRegions.some(selector => {
+        for (const parent of document.querySelectorAll(selector)) {
+            if (parent.contains(element)) return true
+        }
+        return false
+    })
+
+    /**
+     * Does this element exist inside an excluded region?
+     * If so, bail
+     */
+    if (existsInExcludedParent) return null
+
+    /**
+     * We shouldn't be able to get here, but this keeps Typescript happy
+     * and is a good check regardlesss
+     */
+    if (!('href' in element)) return null
+
+    /**
+     * If we get here, we're trying to convert the `element.href`
+     * into a valid Duck Player URL
+     */
+    return VideoParams.fromHref(element.href)?.toPrivatePlayerUrl()
 }

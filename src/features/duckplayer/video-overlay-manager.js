@@ -1,19 +1,18 @@
 /* eslint-disable promise/prefer-await-to-then */
-import { applyEffect, execCleanups, VideoParams } from './util.js'
-import { VideoPlayerIcon } from './video-player-icon'
+import { SideEffects, VideoParams } from './util.js'
 import { DDGVideoOverlay } from './components/ddg-video-overlay.js'
-import { Pixel } from './overlay-messages.js'
+import { OpenInDuckPlayerMsg, Pixel } from './overlay-messages.js'
+import { IconOverlay } from './icon-overlay.js'
 
 /**
  * Handle the switch between small & large overlays
  * + conduct any communications
  */
 export class VideoOverlayManager {
+    sideEffects = new SideEffects()
+
     /** @type {string | null} */
     lastVideoId = null
-
-    /** @type {import("./video-player-icon").VideoPlayerIcon | null} */
-    videoPlayerIcon = null
 
     selectors = {
         videoElement: '#player video',
@@ -42,10 +41,6 @@ export class VideoOverlayManager {
         }
     }
 
-    destroy () {
-        this.removeAllOverlays()
-    }
-
     /**
      * Special handling of a first-page, an attempt to load our overlay as quickly as possible
      */
@@ -67,7 +62,7 @@ export class VideoOverlayManager {
          * So, in that case we append some css quickly to the head to ensure player items are not showing
          * Later, when our overlay loads that CSS will be removed in the cleanup.
          */
-        this.sideEffect('add css to head', () => {
+        this.sideEffects.add('add css to head', () => {
             const s = document.createElement('style')
             s.innerText = '.html5-video-player { opacity: 0!important }'
             if (document.head) {
@@ -83,7 +78,7 @@ export class VideoOverlayManager {
         /**
          * Keep trying to find the video element every 100 ms
          */
-        this.sideEffect('wait for first video element', () => {
+        this.sideEffects.add('wait for first video element', () => {
             const int = setInterval(() => {
                 this.watchForVideoBeingAdded({ via: 'first page load' })
             }, 100)
@@ -98,18 +93,22 @@ export class VideoOverlayManager {
      */
     addSmallDaxOverlay (params) {
         const containerElement = document.querySelector(this.selectors.container)
-        if (!containerElement) {
+        if (!containerElement || !(containerElement instanceof HTMLElement)) {
             console.error('no container element')
             return
         }
-        if (!this.videoPlayerIcon) {
-            // append to the document
-            this.videoPlayerIcon = new VideoPlayerIcon({
-                messages: this.messages,
-                environment: this.environment
+        this.sideEffects.add('adding small dax 🐥 icon overlay', () => {
+            const href = params.toPrivatePlayerUrl()
+
+            const icon = new IconOverlay()
+            icon.appendSmallVideoOverlay(containerElement, href, (href) => {
+                this.messages.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
             })
-        }
-        this.videoPlayerIcon.init(containerElement, params)
+
+            return () => {
+                icon.destroy()
+            }
+        })
     }
 
     /**
@@ -125,16 +124,19 @@ export class VideoOverlayManager {
              * it's likely a 'back' navigation by the user, so we should always try to remove all overlays
              */
             if (this.lastVideoId) {
-                this.removeAllOverlays()
+                this.destroy()
                 this.lastVideoId = null
             }
             return
         }
 
         const conditions = [
+            // cache overridden
             opts.ignoreCache,
+            // first visit
             !this.lastVideoId,
-            this.lastVideoId && this.lastVideoId !== params.id
+            // new video id
+            this.lastVideoId && this.lastVideoId !== params.id // different
         ]
 
         if (conditions.some(Boolean)) {
@@ -156,7 +158,7 @@ export class VideoOverlayManager {
             /**
              * always remove everything first, to prevent any lingering state
              */
-            this.removeAllOverlays()
+            this.destroy()
 
             /**
              * When enabled, always show the small dax icon
@@ -182,8 +184,9 @@ export class VideoOverlayManager {
      * @param {import("./util").VideoParams} params
      */
     appendOverlayToPage (targetElement, params) {
-        this.sideEffect(`appending ${DDGVideoOverlay.CUSTOM_TAG_NAME} to the page`, () => {
+        this.sideEffects.add(`appending ${DDGVideoOverlay.CUSTOM_TAG_NAME} to the page`, () => {
             this.messages.sendPixel(new Pixel({ name: 'overlay' }))
+
             const overlayElement = new DDGVideoOverlay(this.environment, params, this)
             targetElement.appendChild(overlayElement)
 
@@ -192,9 +195,7 @@ export class VideoOverlayManager {
              */
             return () => {
                 const prevOverlayElement = document.querySelector(DDGVideoOverlay.CUSTOM_TAG_NAME)
-                if (prevOverlayElement) {
-                    prevOverlayElement.parentNode?.removeChild?.(prevOverlayElement)
-                }
+                prevOverlayElement?.remove()
             }
         })
     }
@@ -203,7 +204,7 @@ export class VideoOverlayManager {
      * Just brute-force calling video.pause() for as long as the user is seeing the overlay.
      */
     stopVideoFromPlaying () {
-        this.sideEffect(`pausing the <video> element with selector '${this.selectors.videoElement}'`, () => {
+        this.sideEffects.add(`pausing the <video> element with selector '${this.selectors.videoElement}'`, () => {
             /**
              * Set up the interval - keep calling .pause() to prevent
              * the video from playing
@@ -284,35 +285,15 @@ export class VideoOverlayManager {
                 .catch(e => console.error('could not set userChoice for opt-out', e))
         } else {
             this.messages.sendPixel(new Pixel({ name: 'play.do_not_use', remember: '0' }))
-            this.removeAllOverlays()
+            this.destroy()
             this.addSmallDaxOverlay(params)
         }
-    }
-
-    /** @type {{fn: () => void, name: string}[]} */
-    _cleanups = []
-
-    /**
-     * Wrap a side-effecting operation for easier debugging
-     * and teardown/release of resources
-     * @param {string} name
-     * @param {() => () => void} fn
-     */
-    sideEffect (name, fn) {
-        applyEffect(name, fn, this._cleanups)
     }
 
     /**
      * Remove elements, event listeners etc
      */
-    removeAllOverlays () {
-        execCleanups(this._cleanups)
-        this._cleanups = []
-
-        if (this.videoPlayerIcon) {
-            this.videoPlayerIcon.cleanup()
-        }
-
-        this.videoPlayerIcon = null
+    destroy () {
+        this.sideEffects.destroy()
     }
 }

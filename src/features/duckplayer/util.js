@@ -14,15 +14,6 @@ export function addTrustedEventListener (element, event, callback) {
 }
 
 /**
- * Appends an element. This may change if we go with Shadow DOM approach
- * @param {Element} to - which element to append to
- * @param {Element} element - to be appended
- */
-export function appendElement (to, element) {
-    to.appendChild(element)
-}
-
-/**
  * Try to load an image first. If the status code is 2xx, then continue
  * to load
  * @param {HTMLElement} parent
@@ -89,42 +80,42 @@ export function appendImageAsBackground (parent, targetSelector, imageUrl) {
     }
 }
 
-/**
- * Execute any stored tear-down functions.
- *
- * This handled anything you might want to 'undo', like stopping timers,
- * removing things from the page etc.
- *
- * @param {({fn: ()=>void, name: string})[]} cleanups
- */
-export function execCleanups (cleanups) {
-    for (const cleanup of cleanups) {
-        if (typeof cleanup.fn === 'function') {
-            try {
-                cleanup.fn()
-            } catch (e) {
-                console.error(`cleanup ${cleanup.name} threw`, e)
+export class SideEffects {
+    /** @type {{fn: () => void, name: string}[]} */
+    _cleanups = []
+    /**
+     * Wrap a side-effecting operation for easier debugging
+     * and teardown/release of resources
+     * @param {string} name
+     * @param {() => () => void} fn
+     */
+    add (name, fn) {
+        try {
+            const cleanup = fn()
+            if (typeof cleanup === 'function') {
+                this._cleanups.push({ name, fn: cleanup })
             }
-        } else {
-            throw new Error('invalid cleanup')
+        } catch (e) {
+            console.error('%s threw an error', name, e)
         }
     }
-}
 
-/**
- * @param {string} name
- * @param {()=>void} fn
- * @param {{name: string, fn: ()=>void}[]} storage
- */
-export function applyEffect (name, fn, storage) {
-    let cleanup
-    try {
-        cleanup = fn()
-    } catch (e) {
-        console.error('%s threw an error', name, e)
-    }
-    if (typeof cleanup === 'function') {
-        storage.push({ name, fn: cleanup })
+    /**
+     * Remove elements, event listeners etc
+     */
+    destroy () {
+        for (const cleanup of this._cleanups) {
+            if (typeof cleanup.fn === 'function') {
+                try {
+                    cleanup.fn()
+                } catch (e) {
+                    console.error(`cleanup ${cleanup.name} threw`, e)
+                }
+            } else {
+                throw new Error('invalid cleanup')
+            }
+        }
+        this._cleanups = []
     }
 }
 
