@@ -37,6 +37,7 @@ export class Thumbnails {
             icon.appendHoverOverlay((href) => {
                 this.messages.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
             })
+            let clicked = false
 
             // detect all click, if it's anywhere on the page
             // but in the icon overlay itself, then just hide the overlay
@@ -45,8 +46,12 @@ export class Thumbnails {
                 if (overlay?.contains(e.target)) {
                     // do nothing here, the click will have been handled by the overlay
                 } else if (overlay) {
+                    clicked = true
                     icon.hideOverlay(overlay)
                     icon.hoverOverlayVisible = false
+                    setTimeout(() => {
+                        clicked = false
+                    }, 0)
                 }
             }
 
@@ -54,6 +59,7 @@ export class Thumbnails {
 
             // detect hovers and decide to show hover icon, or not
             const mouseOverHandler = (e) => {
+                if (clicked) return
                 const hoverElement = findElementFromEvent(selectors.thumbLink, e)
                 const validLink = isValidLink(hoverElement, this.settings)
 
