@@ -785,14 +785,3 @@ export function sendMessage (messageType, options) {
     return originalWindowDispatchEvent(createCustomEvent('sendMessageProxy' + messageSecret, { detail: { messageType, options } }))
     // TBD other platforms
 }
-
-/**
- * @see https://github.com/developit/dlv
- */
-export default function dlv (obj, keyPath, defaultValue, p, undef) {
-    keyPath = keyPath.split ? keyPath.split('.') : keyPath
-    for (p = 0; p < keyPath.length; p++) {
-        obj = obj ? obj[keyPath[p]] : undef
-    }
-    return obj === undef ? defaultValue : obj
-}

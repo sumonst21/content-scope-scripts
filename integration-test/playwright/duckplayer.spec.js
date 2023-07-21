@@ -286,6 +286,20 @@ test.describe('Video Player overlays', () => {
         await overlays.watchHere()
         await overlays.userSettingWasUpdatedTo('always ask remembered') // updated
     })
+    test.describe('with remote config overrides', () => {
+        test('Selecting \'watch here\' + remember', async ({ page }, workerInfo) => {
+            const overlays = DuckplayerOverlays.create(page, workerInfo)
+
+            // config with some CSS selectors overridden
+            await overlays.withRemoteConfig({ json: 'video-alt-selectors.json' })
+
+            // And my setting is 'always ask'
+            await overlays.userSettingIs('always ask')
+            await overlays.gotoPlayerPage({ pageType: 'videoAltSelectors' })
+            await page.pause()
+            await overlays.overlayBlocksVideo()
+        })
+    })
 })
 
 test.describe('serp proxy', () => {

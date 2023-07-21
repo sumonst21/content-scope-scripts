@@ -1,5 +1,5 @@
 import css from './assets/styles.css'
-import { SideEffects, VideoParams } from './util'
+import { SideEffects, VideoParams } from './util.js'
 import dax from './assets/dax.svg'
 import { i18n } from './text.js'
 import { html, trustedUnsafe } from '../../dom-utils.js'

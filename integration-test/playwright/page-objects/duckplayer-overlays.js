@@ -40,12 +40,14 @@ const configFiles = /** @type {const} */([
     'disabled.json',
     'thumbnail-overlays-disabled.json',
     'click-interceptions-disabled.json',
-    'video-overlays-disabled.json'
+    'video-overlays-disabled.json',
+    'video-alt-selectors.json'
 ])
 
 export class DuckplayerOverlays {
     overlaysPage = '/duckplayer/pages/overlays.html'
     playerPage = '/duckplayer/pages/player.html'
+    videoAltSelectors = '/duckplayer/pages/video-alt-selectors.html'
     serpProxyPage = '/duckplayer/pages/serp-proxy.html'
     /**
      * @param {import("@playwright/test").Page} page
@@ -130,16 +132,19 @@ export class DuckplayerOverlays {
      * @param {object} [params]
      * @param {"default" | "incremental-dom"} [params.variant]
      * @param {string} [params.videoID]
+     * @param {'playerPage' | 'videoAltSelectors'} [params.pageType]
      *  - we are replicating different strategies in the HTML to capture regressions/bugs
      */
     async gotoPlayerPage (params = {}) {
-        const { variant = 'default', videoID = '123' } = params
+        const { variant = 'default', videoID = '123', pageType = 'playerPage' } = params
         const urlParams = new URLSearchParams([
             ['v', videoID],
             ['variant', variant]
         ])
 
-        await this.page.goto(this.playerPage + '?' + urlParams.toString())
+        const page = this[pageType]
+
+        await this.page.goto(page + '?' + urlParams.toString())
     }
 
     async gotoSerpProxyPage () {

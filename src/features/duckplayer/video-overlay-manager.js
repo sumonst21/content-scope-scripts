@@ -14,18 +14,15 @@ export class VideoOverlayManager {
     /** @type {string | null} */
     lastVideoId = null
 
-    selectors = {
-        videoElement: '#player video',
-        container: '#player .html5-video-player'
-    }
-
     /**
      * @param {import("../duck-player.js").UserValues} userValues
+     * @param {import("../duck-player.js").OverlaysFeatureSettings} settings
      * @param {import("./overlays.js").Environment} environment
      * @param {import("./overlay-messages.js").DuckPlayerOverlayMessages} messages
      */
-    constructor (userValues, environment, messages) {
+    constructor (userValues, settings, environment, messages) {
         this.userValues = userValues
+        this.settings = settings
         this.environment = environment
         this.messages = messages
     }
@@ -63,14 +60,14 @@ export class VideoOverlayManager {
          * Later, when our overlay loads that CSS will be removed in the cleanup.
          */
         this.sideEffects.add('add css to head', () => {
-            const s = document.createElement('style')
-            s.innerText = '.html5-video-player { opacity: 0!important }'
+            const style = document.createElement('style')
+            style.innerText = '#player .html5-video-player { opacity: 0!important }'
             if (document.head) {
-                document.head.appendChild(s)
+                document.head.appendChild(style)
             }
             return () => {
-                if (s.isConnected) {
-                    document.head.removeChild(s)
+                if (style.isConnected) {
+                    document.head.removeChild(style)
                 }
             }
         })
@@ -92,7 +89,7 @@ export class VideoOverlayManager {
      * @param {import("./util").VideoParams} params
      */
     addSmallDaxOverlay (params) {
-        const containerElement = document.querySelector(this.selectors.container)
+        const containerElement = document.querySelector(this.settings.selectors.videoElementContainer)
         if (!containerElement || !(containerElement instanceof HTMLElement)) {
             console.error('no container element')
             return
@@ -143,8 +140,8 @@ export class VideoOverlayManager {
             /**
              * Don't continue until we've been able to find the HTML elements that we inject into
              */
-            const videoElement = document.querySelector(this.selectors.videoElement)
-            const playerContainer = document.querySelector(this.selectors.container)
+            const videoElement = document.querySelector(this.settings.selectors.videoElement)
+            const playerContainer = document.querySelector(this.settings.selectors.videoElementContainer)
             if (!videoElement || !playerContainer) {
                 return null
             }
@@ -204,13 +201,13 @@ export class VideoOverlayManager {
      * Just brute-force calling video.pause() for as long as the user is seeing the overlay.
      */
     stopVideoFromPlaying () {
-        this.sideEffects.add(`pausing the <video> element with selector '${this.selectors.videoElement}'`, () => {
+        this.sideEffects.add(`pausing the <video> element with selector '${this.settings.selectors.videoElement}'`, () => {
             /**
              * Set up the interval - keep calling .pause() to prevent
              * the video from playing
              */
             const int = setInterval(() => {
-                const video = /** @type {HTMLVideoElement} */(document.querySelector(this.selectors.videoElement))
+                const video = /** @type {HTMLVideoElement} */(document.querySelector(this.settings.selectors.videoElement))
                 if (video?.isConnected) {
                     video.pause()
                 }
@@ -223,7 +220,7 @@ export class VideoOverlayManager {
             return () => {
                 clearInterval(int)
 
-                const video = /** @type {HTMLVideoElement} */(document.querySelector(this.selectors.videoElement))
+                const video = /** @type {HTMLVideoElement} */(document.querySelector(this.settings.selectors.videoElement))
                 if (video?.isConnected) {
                     video.play()
                 }

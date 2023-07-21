@@ -10,8 +10,7 @@ import { OpenInDuckPlayerMsg } from './overlay-messages.js'
  */
 
 /**
- * This features covers the implementation of hover-icons
- * + click interceptions
+ * This features covers the implementation
  */
 export class Thumbnails {
     sideEffects = new SideEffects()
@@ -37,6 +36,9 @@ export class Thumbnails {
             icon.appendHoverOverlay((href) => {
                 this.messages.openDuckPlayer(new OpenInDuckPlayerMsg({ href }))
             })
+
+            // remember when a none-dax click occurs - so that we can avoid re-adding the
+            // icon whilst the page is navigating
             let clicked = false
 
             // detect all click, if it's anywhere on the page
