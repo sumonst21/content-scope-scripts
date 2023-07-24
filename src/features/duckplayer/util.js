@@ -276,7 +276,7 @@ export class DomState {
  * A single place to validate the overflow settings
  * and set defaults if needed
  * @param {any} input
- * @returns {import("../duck-player.js").OverlaysFeatureSettings}
+ * @returns {import("../duck-player").OverlaysFeatureSettings}
  */
 export function validateSettings (input) {
     return {

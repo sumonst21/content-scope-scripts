@@ -115,27 +115,7 @@ export default class DuckPlayerFeature extends ContentFeature {
 }
 
 /**
- * @typedef OverlaysFeatureSettings
- * This configuration is used within YouTube.com
- *
- * - See {@link "Duck Player Overlays"} for a full JSON example
- *
- * @property {object} selectors
- * In the config, this is under `/features/duckPlayer/settings/overlays/youtube/selectors`
- * @property {string} selectors.thumbLink - the CSS selector used to find links
- * @property {string[]} selectors.excludedRegions - CSS selectors of regions to exclude
- * @property {string} selectors.videoElement - CSS selector for the main YouTube HTML5 Video Element
- * @property {string} selectors.videoElementContainer - The parent element that contains the video element
- * @property {object} thumbnailOverlays
- * In the config, this is under `/features/duckPlayer/settings/overlays/youtube/thumbnailOverlays`
- * @property {'enabled' | 'disabled'} thumbnailOverlays.state
- * @property {object} videoOverlays
- * In the config, this is under `/features/duckPlayer/settings/overlays/youtube/videoOverlays`
- * @property {'enabled' | 'disabled'} videoOverlays.state
- * @property {object} clickInterception
- * In the config, this is under `/features/duckPlayer/settings/overlays/youtube/clickInterception`
- *
- * @property {'enabled' | 'disabled'} clickInterception.state
+ * @typedef {Omit<import("./duckplayer/duckplayer-settings").YouTubeOverlay, "state">} OverlaysFeatureSettings
  */
 
 // for docs generation
