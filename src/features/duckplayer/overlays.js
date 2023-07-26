@@ -38,21 +38,21 @@ export async function initOverlays (settings, environment, messages) {
             registerCustomElements()
         }
         domState.onLoaded(() => {
+            // start initially
             thumbnails?.init()
             videoOverlays?.init('page-load')
 
-            const title = document.head.querySelector('title')
-
-            const m = new MutationObserver((records) => {
-                for (const record of records) {
-                    if (record.target === title) {
-                        if (record.addedNodes) {
-                            videoOverlays?.init('title-changed')
-                        }
+            // now add video overlay specific stuff
+            if (videoOverlays) {
+                // there was an issue capturing history.pushState, so just falling back to
+                let prev = globalThis.location.href
+                setInterval(() => {
+                    if (globalThis.location.href !== prev) {
+                        videoOverlays?.init('href-changed')
                     }
-                }
-            })
-            m.observe(document.head, { childList: true, subtree: true })
+                    prev = globalThis.location.href
+                }, 500)
+            }
         })
     }
 

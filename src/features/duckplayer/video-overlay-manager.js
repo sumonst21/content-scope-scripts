@@ -28,15 +28,15 @@ export class VideoOverlayManager {
     }
 
     /**
-     * @param {'page-load' | 'preferences-changed' | 'title-changed'} trigger
+     * @param {'page-load' | 'preferences-changed' | 'href-changed'} trigger
      */
     init (trigger) {
         if (trigger === 'page-load') {
             this.handleFirstPageLoad()
         } else if (trigger === 'preferences-changed') {
             this.watchForVideoBeingAdded({ via: 'user notification', ignoreCache: true })
-        } else if (trigger === 'title-changed') {
-            this.watchForVideoBeingAdded({ via: 'title changed' })
+        } else if (trigger === 'href-changed') {
+            this.watchForVideoBeingAdded({ via: 'href changed' })
         }
     }
 

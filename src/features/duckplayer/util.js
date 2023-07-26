@@ -40,7 +40,6 @@ export function appendImageAsBackground (parent, targetSelector, imageUrl) {
                 console.warn('ignoring cancelled load')
             }
         } else {
-            console.error('❌ status code did not start with a 2')
             markError()
         }
     }).catch(() => {
