@@ -296,7 +296,6 @@ test.describe('Video Player overlays', () => {
             // And my setting is 'always ask'
             await overlays.userSettingIs('always ask')
             await overlays.gotoPlayerPage({ pageType: 'videoAltSelectors' })
-            await page.pause()
             await overlays.overlayBlocksVideo()
         })
     })

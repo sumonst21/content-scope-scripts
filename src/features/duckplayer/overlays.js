@@ -22,7 +22,7 @@ export async function initOverlays (settings, environment, messages) {
     }
 
     if (!userValues) {
-        console.log('cannot continue without user settings')
+        console.error('cannot continue without user settings')
         return
     }
 
@@ -47,7 +47,7 @@ export async function initOverlays (settings, environment, messages) {
                 for (const record of records) {
                     if (record.target === title) {
                         if (record.addedNodes) {
-                            videoOverlays?.watchForVideoBeingAdded({ via: 'title changed' })
+                            videoOverlays?.init('title-changed')
                         }
                     }
                 }
