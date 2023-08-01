@@ -36,11 +36,11 @@ export async function initOverlays (settings, environment, messages) {
     if (thumbnails || videoOverlays) {
         if (videoOverlays) {
             registerCustomElements()
+            videoOverlays?.init('page-load')
         }
         domState.onLoaded(() => {
             // start initially
             thumbnails?.init()
-            videoOverlays?.init('page-load')
 
             // now add video overlay specific stuff
             if (videoOverlays) {
